@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>COCA - PROTO</title>
+
+        <link href="data:image/gif;" rel="icon" type="image/x-icon" />
+
+        <!-- Bootstrap -->
+        <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
+
+        <link rel="stylesheet" href="http://simonwhitaker.github.com/github-fork-ribbon-css/gh-fork-ribbon.css" />
+        <link rel="stylesheet" href="example/css/style.css" />
+        <link rel="screenshot" itemprop="screenshot" href="http://katspaugh.github.io/wavesurfer.js/example/screenshot.png" />
+
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.js"></script>
+
+        <!-- wavesurfer.js -->
+        <script src="build/wavesurfer.min.js"></script>
+
+        <!-- Demo -->
+        <script src="example/main.js"></script>
+        <script src="example/trivia.js"></script>
+    </head>
+
+    <body itemscope itemtype="http://schema.org/WebApplication">
+        <div class="container">
+            <div class="header">
+                <noindex>
+                <ul class="nav nav-pills pull-right">
+                    <li><a href="?fill">Fill</a></li>
+                    <li><a href="?scroll">Scroll</a></li>
+                </ul>
+                </noindex>
+
+                <h1 itemprop="name">COCA - PROTO</h1>
+            </div>
+
+            <div id="demo">
+                <div class="lead pull-center" id="drop">
+                    Drag'n'drop your file here!
+                </div>
+                <div id="waveform">
+                    <div class="progress progress-striped active" id="progress-bar">
+                        <div class="progress-bar progress-bar-info"></div>
+                    </div>
+
+                    <!-- Here be the waveform -->
+                </div>
+
+                <div class="controls">
+                    <button class="btn btn-primary" data-action="back">
+                        <i class="glyphicon glyphicon-step-backward"></i>
+                    </button>
+
+                    <button class="btn btn-primary" data-action="play">
+                        <i class="glyphicon glyphicon-play"></i>
+                        /
+                        <i class="glyphicon glyphicon-pause"></i>
+                    </button>
+
+                    <button class="btn btn-primary" data-action="forth">
+                        <i class="glyphicon glyphicon-step-forward"></i>
+                    </button>
+
+                    <div class="row">
+                        <div class="panel panel-default widget">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Teacher tools</h3>
+                            </div>
+                            <div class="panel-body">
+                                <button class="btn btn-danger" data-action="red-mark">
+                                    <i class="glyphicon glyphicon-flag"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="panel panel-default widget">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Student tools</h3>
+                            </div>
+                            <div class="panel-body">
+                                <button class="btn btn-success" data-action="green-mark">
+                                    <i class="glyphicon glyphicon-flag"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="panel panel-default widget">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Student Markers</h3>
+                        </div>
+                        <div class="panel-body">
+                            <ul class="list-group">
+                                <li class="list-group-item">
+                                    <div class="row">
+                                        <div class="col-xs-2 col-md-2">
+                                            <div class="action">
+                                                <button type="button" class="btn btn-success btn-xs" title="Approved">
+                                                    <span class="glyphicon glyphicon-play"></span>
+                                                </button>
+                                                <button type="button" class="btn btn-primary btn-xs" title="Edit">
+                                                    <span class="glyphicon glyphicon-pencil"></span>
+                                                </button>
+                                                <button type="button" class="btn btn-danger btn-xs" title="Delete">
+                                                    <span class="glyphicon glyphicon-trash"></span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="col-xs-10 col-md-10">
+                                            <h3>3:30</h3>
+                                            <div class="comment-text">
+                                                Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh
+                                                euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item">
+                                    <div class="row">
+                                        <div class="col-xs-2 col-md-2">
+                                            <div class="action">
+                                                <button type="button" class="btn btn-success btn-xs" title="Approved">
+                                                    <span class="glyphicon glyphicon-play"></span>
+                                                </button>
+                                                <button type="button" class="btn btn-primary btn-xs" title="Edit">
+                                                    <span class="glyphicon glyphicon-pencil"></span>
+                                                </button>
+                                                <button type="button" class="btn btn-danger btn-xs" title="Delete">
+                                                    <span class="glyphicon glyphicon-trash"></span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="col-xs-10 col-md-10">
+                                            <h3>3:50</h3>
+                                            <div class="comment-text">
+                                                Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh
+                                                euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item">
+                                    <div class="row">
+                                        <div class="col-xs-2 col-md-2">
+                                            <div class="action">
+                                                <button type="button" class="btn btn-success btn-xs" title="Approved">
+                                                    <span class="glyphicon glyphicon-play"></span>
+                                                </button>
+                                                <button type="button" class="btn btn-primary btn-xs" title="Edit">
+                                                    <span class="glyphicon glyphicon-pencil"></span>
+                                                </button>
+                                                <button type="button" class="btn btn-danger btn-xs" title="Delete">
+                                                    <span class="glyphicon glyphicon-trash"></span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="col-xs-10 col-md-10">
+                                            <h3>4:15</h3>
+                                            <div class="comment-text">
+                                                Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh
+                                                euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

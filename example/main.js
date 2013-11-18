@@ -62,7 +62,6 @@ wavesurfer.on('ready', function () {
             //addComment();
 
             wavesurfer.mark({
-                id: 'up',
                 color: 'rgba(0, 255, 0, 0.5)'
             });
 
@@ -72,7 +71,6 @@ wavesurfer.on('ready', function () {
         'red-mark': function () {
             //wavesurfer.pause();
             wavesurfer.mark({
-                id: 'down',
                 color: 'rgba(255, 0, 0, 0.5)'
             });
 

@@ -58,21 +58,25 @@ wavesurfer.on('ready', function () {
 
         'green-mark': function () {
             //wavesurfer.pause();
-
+            var id = generateId();
             var time = secondsToHms(wavesurfer.backend.getCurrentTime());
-            addComment(time);
+            addComment(time, id);
 
             wavesurfer.mark({
-                color: 'rgba(0, 255, 0, 0.5)'
+                color: 'rgba(0, 255, 0, 0.5)',
+                id: id
             });
 
-            //alert('marked at position : ' + wavesurfer.backend.getCurrentTime().toFixed(2));
         },
 
         'red-mark': function () {
+            var id = generateId();
+            var time = secondsToHms(wavesurfer.backend.getCurrentTime());
+
             //wavesurfer.pause();
             wavesurfer.mark({
-                color: 'rgba(255, 0, 0, 0.5)'
+                color: 'rgba(255, 0, 0, 0.5)',
+                id: id
             });
 
         },
@@ -92,10 +96,15 @@ wavesurfer.on('ready', function () {
         'play-segment': function () {
             wavesurfer.seekTo(2);
         },
+
+        'delete-marks': function () {
+            wavesurfer.clearMarks();
+        },
     };
 
     document.addEventListener('keydown', function (e) {
         var map = {
+            20: 'delete-marks', //caps lock 
             32: 'play',       // space
             38: 'green-mark', // up
             40: 'red-mark',   // down
@@ -137,9 +146,18 @@ wavesurfer.on('error', function (err) {
 });
 
 
+
+function generateId(){
+    var n=Math.floor(Math.random()*11);
+    var k = Math.floor(Math.random()* 1000000);
+    var m = String.fromCharCode(n)+k;
+
+    return m;
+}
+
 /*Dono*/
-function addComment(time) {
-    $('#student-coments').append('<li class="list-group-item"><div class="row"><div class="col-xs-2 col-md-2"><div class="action"><button type="button" class="btn btn-success btn-xs" title="Approved"><span class="glyphicon glyphicon-play"></span></button><button type="button" class="btn btn-primary btn-xs" title="Edit"><span class="glyphicon glyphicon-pencil"></span></button><button type="button" class="btn btn-danger btn-xs" title="Delete"><span class="glyphicon glyphicon-trash"></span></button></div></div><div class="col-xs-10 col-md-10"><h3>'+time+'</h3><div class="comment-text">Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibheuismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim</div></div></div></li>');
+function addComment(time, id) {
+    $('#student-coments').append('<li id="'+ id +'" class="list-group-item"><div class="row"><div class="col-xs-2 col-md-2"><div class="action"><button type="button" class="btn btn-success btn-xs" title="Approved"><span class="glyphicon glyphicon-play"></span></button><button type="button" class="btn btn-primary btn-xs" title="Edit"><span class="glyphicon glyphicon-pencil"></span></button><button type="button" class="btn btn-danger btn-xs remove" title="Delete" id="'+ id +'"><span class="glyphicon glyphicon-trash"></span></button></div></div><div class="col-xs-10 col-md-10"><h3>'+time+'</h3><div class="comment-text">Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibheuismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim</div></div></div></li>');
 }
 
 function secondsToHms(d) {
@@ -158,3 +176,14 @@ function secondsToHms(d) {
 function seekSegmentAndPlay(time) {
 
 }
+
+
+
+
+
+ $( document ).on("click", ".remove", function() {
+    var id = $(this).attr("id");
+    wavesurfer.markers[id].remove();
+    wavesurfer.redrawMarks();
+    $(this).parents("li").remove();
+}); 

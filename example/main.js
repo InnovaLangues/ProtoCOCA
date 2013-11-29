@@ -7,8 +7,8 @@ var wavesurfer = Object.create(WaveSurfer);
 document.addEventListener('DOMContentLoaded', function () {
     var options = {
         container     : document.querySelector('#waveform'),
-        waveColor     : 'violet',
-        progressColor : 'purple',
+        waveColor     : 'lightgrey',
+        progressColor : 'black',
         loaderColor   : 'purple',
         cursorColor   : 'navy',
         markerWidth   : 2
@@ -148,16 +148,18 @@ wavesurfer.on('error', function (err) {
 
 
 function generateId(){
-    var n=Math.floor(Math.random()*11);
-    var k = Math.floor(Math.random()* 1000000);
-    var m = String.fromCharCode(n)+k;
-
-    return m;
+   var d = new Date().getTime();
+    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = (d + Math.random()*16)%16 | 0;
+        d = Math.floor(d/16);
+        return (c=='x' ? r : (r&0x7|0x8)).toString(16);
+    });
+    return uuid;
 }
 
 /*Dono*/
 function addComment(time, id) {
-    $('#student-coments').append('<li id="'+ id +'" class="list-group-item"><div class="row"><div class="col-xs-2 col-md-2"><div class="action"><button type="button" class="btn btn-success btn-xs" title="Approved"><span class="glyphicon glyphicon-play"></span></button><button type="button" class="btn btn-primary btn-xs" title="Edit"><span class="glyphicon glyphicon-pencil"></span></button><button type="button" class="btn btn-danger btn-xs remove" title="Delete" id="'+ id +'"><span class="glyphicon glyphicon-trash"></span></button></div></div><div class="col-xs-10 col-md-10"><h3>'+time+'</h3><div class="comment-text">Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibheuismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim</div></div></div></li>');
+    $('#student-coments').append('<li id="'+ id +'" class="list-group-item"><div class="row"><div class="col-xs-2 col-md-2"><div class="action"><button type="button" class="btn btn-success btn-xs" title="Approved"><span class="glyphicon glyphicon-play"></span></button><button type="button" class="btn btn-primary btn-xs edit" title="Edit" id="'+ id +'"><span class="glyphicon glyphicon-pencil"></span></button><button type="button" class="btn btn-danger btn-xs remove" title="Delete" id="'+ id +'"><span class="glyphicon glyphicon-trash"></span></button></div></div><div class="col-xs-10 col-md-10"><h3 class="time">'+time+'</h3><div class="comment-text">Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibheuismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim</div></div></div></li>');
 }
 
 function secondsToHms(d) {
@@ -178,12 +180,23 @@ function seekSegmentAndPlay(time) {
 }
 
 
-
-
-
- $( document ).on("click", ".remove", function() {
+$( document ).on("click", ".remove", function() {
     var id = $(this).attr("id");
     wavesurfer.markers[id].remove();
     wavesurfer.redrawMarks();
     $(this).parents("li").remove();
+}); 
+
+
+$( document ).on("click", ".edit", function() {
+    var id = $(this).attr("id");
+    var time = wavesurfer.backend.getCurrentTime();
+    
+    wavesurfer.markers[id].update({
+        id: id,
+        position: time,
+    });
+    wavesurfer.redrawMarks();
+    //$(this).parents("li").children(".time").html("");
+
 }); 

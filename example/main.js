@@ -59,7 +59,8 @@ wavesurfer.on('ready', function () {
         'green-mark': function () {
             //wavesurfer.pause();
 
-            //addComment();
+            var time = secondsToHms(wavesurfer.backend.getCurrentTime());
+            addComment(time);
 
             wavesurfer.mark({
                 color: 'rgba(0, 255, 0, 0.5)'
@@ -86,7 +87,11 @@ wavesurfer.on('ready', function () {
 
         'toggle-mute': function () {
             wavesurfer.toggleMute();
-        }
+        },
+
+        'play-segment': function () {
+            wavesurfer.seekTo(2);
+        },
     };
 
     document.addEventListener('keydown', function (e) {
@@ -133,6 +138,23 @@ wavesurfer.on('error', function (err) {
 
 
 /*Dono*/
-function addComment() {
-    $('#student-comments').append('<div class="student-comment">My comment</div>');
+function addComment(time) {
+    $('#student-coments').append('<li class="list-group-item"><div class="row"><div class="col-xs-2 col-md-2"><div class="action"><button type="button" class="btn btn-success btn-xs" title="Approved"><span class="glyphicon glyphicon-play"></span></button><button type="button" class="btn btn-primary btn-xs" title="Edit"><span class="glyphicon glyphicon-pencil"></span></button><button type="button" class="btn btn-danger btn-xs" title="Delete"><span class="glyphicon glyphicon-trash"></span></button></div></div><div class="col-xs-10 col-md-10"><h3>'+time+'</h3><div class="comment-text">Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibheuismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim</div></div></div></li>');
+}
+
+function secondsToHms(d) {
+    d = Number(d);
+    var h = Math.floor(d / 3600);
+    var m = Math.floor(d % 3600 / 60);
+    var s = Math.floor(d % 3600 % 60);
+
+    var str = d.toString();
+    var substr = str.split('.');
+    var ms = substr[1].substring(0,2);
+
+    return ((h > 0 ? h + ":" : "") + (m > 0 ? (h > 0 && m < 10 ? "0" : "") + m + ":" : "0:") + (s < 10 ? "0" : "") + s + ":" + ms);
+}
+
+function seekSegmentAndPlay(time) {
+
 }

@@ -159,7 +159,8 @@ function generateId(){
 
 /*Dono*/
 function addComment(time, id) {
-    $('#student-coments').append('<li id="'+ id +'" class="list-group-item"><div class="row"><div class="col-xs-3 col-md-3"><div class="action"><button type="button" class="btn btn-success btn-xs" title="Approved"><span class="glyphicon glyphicon-play"></span></button><button type="button" class="btn btn-primary btn-xs edit" title="Edit" id="'+ id +'"><span class="glyphicon glyphicon-pencil"></span></button><button type="button" class="btn btn-danger btn-xs remove" title="Delete" id="'+ id +'"><span class="glyphicon glyphicon-trash"></span></button></div></div><div class="col-xs-9 col-md-9"><h3 class="time">'+time+'</h3><div class="comment-text">Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibheuismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim</div></div></div></li>');
+    $('#student-coments').append('<li data-time="'+time+'" id="'+ id +'" class="commment list-group-item"><div class="row"><div class="col-xs-3 col-md-3"><div class="action"><button type="button" class="btn btn-success btn-xs" title="Approved"><span class="glyphicon glyphicon-play"></span></button><button type="button" class="btn btn-primary btn-xs edit" title="Edit" id="'+ id +'"><span class="glyphicon glyphicon-pencil"></span></button><button type="button" class="btn btn-danger btn-xs remove" title="Delete" id="'+ id +'"><span class="glyphicon glyphicon-trash"></span></button></div></div><div class="col-xs-9 col-md-9"><h3 class="time">'+time+'</h3><div class="comment-text">Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibheuismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim</div></div></div></li>');
+    $(".comment").sort(SortByTime);
 }
 
 function secondsToHms(d) {
@@ -192,11 +193,17 @@ $( document ).on("click", ".edit", function() {
     var id = $(this).attr("id");
     var time = wavesurfer.backend.getCurrentTime();
     $(this).parents("li").find(".time").html(secondsToHms(time));
-
+    $(".comment").sort(SortByTime);
     wavesurfer.markers[id].update({
         id: id,
         position: time,
     });
     wavesurfer.redrawMarks();
-    
+
 }); 
+
+function SortByTime(a, b){
+  var aTime = a.attr("data-time");
+  var bTime = b.attr("data-time"); 
+  return ((aTime < bTime) ? -1 : ((aTime > bTime) ? 1 : 0));
+}

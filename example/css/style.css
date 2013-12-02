@@ -113,7 +113,15 @@ body {
 
 .student-comment {
     background-color: #ccc;
-    padding: 5px;
-    margin-bottom: 5px;
+    padding: 25px;
 }
 
+textarea{
+    border:none;
+    width:100%;
+}
+
+.commment{
+    margin-bottom:20px;
+    border-bottom:none;
+}

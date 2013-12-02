@@ -60,7 +60,8 @@ wavesurfer.on('ready', function () {
             //wavesurfer.pause();
             var id = generateId();
             var time = secondsToHms(wavesurfer.backend.getCurrentTime());
-            addComment(time, id);
+            var wsTime = wavesurfer.backend.getCurrentTime();
+            addComment(wsTime, time, id);
 
             wavesurfer.mark({
                 color: 'rgba(0, 255, 0, 0.5)',
@@ -146,21 +147,49 @@ wavesurfer.on('error', function (err) {
 });
 
 
+// EVENTS 
 
-function generateId(){
-   var d = new Date().getTime();
-    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        var r = (d + Math.random()*16)%16 | 0;
-        d = Math.floor(d/16);
-        return (c=='x' ? r : (r&0x7|0x8)).toString(16);
+$( document ).on("click", ".remove", function() {
+    var id = $(this).parents("li").attr("id");
+    wavesurfer.markers[id].remove();
+    wavesurfer.redrawMarks();
+    $(this).parents("li").remove();
+}); 
+
+
+$( document ).on("click", ".move-to-current-time", function() {
+    var time = wavesurfer.backend.getCurrentTime();
+    updateMarker(time, $(this));
+}); 
+
+$( document ).on("click", ".move-backward", function() {
+    var time = parseFloat($(this).parents("li").attr("data-time")) - 0.5;
+    updateMarker(time, $(this));
+});
+
+$( document ).on("click", ".move-forward", function() {
+    var time = parseFloat($(this).parents("li").attr("data-time")) + 0.5;
+    updateMarker(time, $(this));
+}); 
+
+$( document ).on("click", ".play", function() {
+    var time = parseFloat($(this).parents("li").attr("data-time"));
+    wavesurfer.backend.play(time, time + 2);
+});
+
+
+
+// FUNCTIONS
+
+function updateMarker(time, btn){
+    var id = btn.parents("li").attr("id");
+    btn.parents("li").find(".time").html(secondsToHms(time));
+    btn.parents("li").attr("data-time",time);
+    wavesurfer.markers[id].update({
+        id: id,
+        position: time,
     });
-    return uuid;
-}
-
-/*Dono*/
-function addComment(time, id) {
-    $('#student-coments').append('<li data-time="'+time+'" id="'+ id +'" class="commment list-group-item"><div class="row"><div class="col-xs-3 col-md-3"><div class="action"><button type="button" class="btn btn-success btn-xs" title="Approved"><span class="glyphicon glyphicon-play"></span></button><button type="button" class="btn btn-primary btn-xs edit" title="Edit" id="'+ id +'"><span class="glyphicon glyphicon-pencil"></span></button><button type="button" class="btn btn-danger btn-xs remove" title="Delete" id="'+ id +'"><span class="glyphicon glyphicon-trash"></span></button></div></div><div class="col-xs-9 col-md-9"><h3 class="time">'+time+'</h3><div class="comment-text">Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibheuismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim</div></div></div></li>');
-    $(".comment").sort(SortByTime);
+    wavesurfer.redrawMarks();
 }
 
 function secondsToHms(d) {
@@ -176,34 +205,17 @@ function secondsToHms(d) {
     return ((h > 0 ? h + ":" : "") + (m > 0 ? (h > 0 && m < 10 ? "0" : "") + m + ":" : "0:") + (s < 10 ? "0" : "") + s + ":" + ms);
 }
 
-function seekSegmentAndPlay(time) {
+function generateId(){
+   var d = new Date().getTime();
+    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = (d + Math.random()*16)%16 | 0;
+        d = Math.floor(d/16);
+        return (c=='x' ? r : (r&0x7|0x8)).toString(16);
+    });
 
+    return uuid;
 }
 
-
-$( document ).on("click", ".remove", function() {
-    var id = $(this).attr("id");
-    wavesurfer.markers[id].remove();
-    wavesurfer.redrawMarks();
-    $(this).parents("li").remove();
-}); 
-
-
-$( document ).on("click", ".edit", function() {
-    var id = $(this).attr("id");
-    var time = wavesurfer.backend.getCurrentTime();
-    $(this).parents("li").find(".time").html(secondsToHms(time));
-    $(".comment").sort(SortByTime);
-    wavesurfer.markers[id].update({
-        id: id,
-        position: time,
-    });
-    wavesurfer.redrawMarks();
-
-}); 
-
-function SortByTime(a, b){
-  var aTime = a.attr("data-time");
-  var bTime = b.attr("data-time"); 
-  return ((aTime < bTime) ? -1 : ((aTime > bTime) ? 1 : 0));
+function addComment(wsTime, time, id) {
+    $('#student-coments').append('<li data-time="'+wsTime+'" id="'+ id +'" class="commment list-group-item"><div class="row"><div class="col-xs-9 col-md-9"><div class="buttons"><button type="button" class="btn btn-success btn-xs play" title="Play"><span class="glyphicon glyphicon-play"></span></button><button type="button" class="btn btn-primary btn-xs edit" title="Edit"><span class="glyphicon glyphicon-pencil"></span><button type="button" class="btn btn-primary btn-xs move-backward" title="Backward 50 ms"><span class="glyphicon glyphicon-backward"></span></button><button type="button" class="btn btn-primary btn-xs move-to-current-time" title="Move to current time"><span class="glyphicon glyphicon-screenshot"></span><button type="button" class="btn btn-primary btn-xs move-forward" title="Forward 50 ms"><span class="glyphicon glyphicon-forward"></span></button><button type="button" class="btn btn-danger btn-xs remove" title="Delete"><span class="glyphicon glyphicon-trash"></span></button></div><h3 class="time">'+time+'</h3><div class="comment-text">Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibheuismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim</div></div></div></li>');
 }

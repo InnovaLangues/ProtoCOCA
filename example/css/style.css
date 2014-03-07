@@ -116,12 +116,33 @@ body {
     padding: 25px;
 }
 
-textarea{
-    border:none;
-    width:100%;
-}
 
 .commment{
     margin-bottom:20px;
-    border-bottom:none;
+    /*border-bottom:none;*/
+    border : none;
+}
+
+/*textarea{
+    border:none;
+    width:100%;
+}*/
+.comment-text{
+    margin-top:15px;
+    margin-bottom: 5px;
+    width:100%;
+    height: 75px;
+    font-size:small;
+    resize: none; 
+}
+
+.help-item-list li{
+    margin-bottom: 5px;
+    
+}
+
+#markers{
+    height: 150px;
+    overflow:auto;
+    
 }

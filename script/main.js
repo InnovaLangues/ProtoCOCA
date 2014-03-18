@@ -5,8 +5,24 @@ var wavesurfer = Object.create(WaveSurfer);
 
 var timeline;
 
+var isStudent = true;
+
 // Init & load audio file
 document.addEventListener('DOMContentLoaded', function() {
+
+    // hide student / teacher part depending on who i am
+    if (isStudent) {
+        $("#teacher-markers").css('display', 'none');
+        $("#teacher-tools").css('display', 'none');
+        $("#student-markers").css('visibility', 'visible');
+        $("#student-tools").css('visibility', 'visible');
+    }
+    else {
+        $("#teacher-markers").css('visibility', 'visible');
+        $("#teacher-tools").css('visibility', 'visible');
+        $("#student-markers").css('display', 'none');
+        $("#student-tools").css('display', 'none');
+    }
 
     var options = {
         container: document.querySelector('#waveform'),
@@ -14,17 +30,14 @@ document.addEventListener('DOMContentLoaded', function() {
         progressColor: 'black',
         loaderColor: 'purple',
         cursorColor: 'navy',
-        markerWidth: 2
+        markerWidth: 1,
+        audioRate: 1
     };
 
     if (location.search.match('scroll')) {
         options.minPxPerSec = 100;
         options.scrollParent = true;
     }
-
-    /*if (location.search.match('normalize')) {
-     options.normalize = true;
-     }*/
 
     /* Progress bar */
     var progressDiv = document.querySelector('#progress-bar');
@@ -34,7 +47,7 @@ document.addEventListener('DOMContentLoaded', function() {
         progressBar.style.width = percent + '%';
     });
     wavesurfer.on('ready', function() {
-        progressDiv.style.display = 'none';
+        // progressDiv.style.display = 'none';
     });
 
     // listen to progress event
@@ -45,7 +58,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Init
     wavesurfer.init(options);
     // Load audio from URL
-    wavesurfer.load('example/media/demo.wav');
+    wavesurfer.load('media/demo_jpp.mp3');
 
     // Start listening to drag'n'drop on document
     wavesurfer.bindDragNDrop('#drop');
@@ -53,11 +66,60 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Won't work on iOS until you touch the page
 wavesurfer.on('ready', function() {
-
-    // init current time text
+    var progressDiv = document.querySelector('#progress-bar');
+    progressDiv.style.display = 'none';
+    // init time-text with current time
     $('#time').text(secondsToHms(wavesurfer.backend.getCurrentTime()));
 
-    // avoid creating timeline object twice
+    // load red marks & draw them to teacher markers zone
+    var duration = wavesurfer.backend.getDuration();
+    var markerGap = (duration / 4);
+    var mTime = markerGap;
+
+    var red = Object.create(WaveSurfer.Mark);
+    red.id = wavesurfer.util.getId();
+    red.position = mTime;
+    red.color = '#ff0000';
+    red.type = 'teacher';
+    wavesurfer.mark(red);
+
+    var comment = 'Comment 1';
+
+    var id = generateId();
+    var time = secondsToHms(mTime);
+    var wsTime = mTime;
+    addTeacherComment(wsTime, time, id, comment);
+
+    mTime += markerGap;
+
+    red = Object.create(WaveSurfer.Mark);
+    red.id = wavesurfer.util.getId();
+    red.position = mTime;
+    red.color = '#ff0000';
+    red.type = 'teacher';
+    wavesurfer.mark(red);
+
+    comment = 'Comment 2';
+    id = generateId();
+    time = secondsToHms(mTime);
+    wsTime = mTime;
+    addTeacherComment(wsTime, time, id, comment);
+
+    mTime += markerGap;
+
+    red = Object.create(WaveSurfer.Mark);
+    red.id = wavesurfer.util.getId();
+    red.position = mTime;
+    red.color = '#ff0000';
+    red.type = 'teacher';
+    wavesurfer.mark(red);
+
+    id = generateId();
+    time = secondsToHms(mTime);
+    wsTime = mTime;
+    addTeacherComment(wsTime, time, id);
+
+    // avoid creating timeline object twice (after drag&drop for example)
     if (timeline) {
         $('#wave-timeline wave').remove();
     }
@@ -79,11 +141,10 @@ wavesurfer.on('ready', function() {
             wavesurfer.playPause();
         },
         'green-mark': function() {
-            //wavesurfer.pause();
             var id = generateId();
             var time = secondsToHms(wavesurfer.backend.getCurrentTime());
             var wsTime = wavesurfer.backend.getCurrentTime();
-            addComment(wsTime, time, id);
+            addStudentComment(wsTime, time, id);
 
             wavesurfer.mark({
                 color: 'rgba(0, 255, 0, 0.5)',
@@ -94,20 +155,19 @@ wavesurfer.on('ready', function() {
         'red-mark': function() {
             var id = generateId();
             var time = secondsToHms(wavesurfer.backend.getCurrentTime());
+            var wsTime = wavesurfer.backend.getCurrentTime();
+            addTeacherComment(wsTime, time, id);
 
-            //wavesurfer.pause();
             wavesurfer.mark({
                 color: 'rgba(255, 0, 0, 0.5)',
-                id: id
+                id: id,
+                type: 'teacher'
             });
-
         },
         'back': function() {
             moveBackward();
-            //wavesurfer.skipBackward();
         },
         'forth': function() {
-            //wavesurfer.skipForward();
             moveForward();
         },
         'toggle-mute': function() {
@@ -117,9 +177,31 @@ wavesurfer.on('ready', function() {
             wavesurfer.seekTo(2);
         },
         'delete-marks': function() {
-            wavesurfer.clearMarks();
-            // also delete
-            $('#student-coments > li').remove();
+            // depending on who i am (student or teacher) only remove red or green markers
+ 
+            Object.keys(wavesurfer.markers).forEach(function(id) {
+                var marker = wavesurfer.markers[id];
+                var type = marker.type;
+                // green markers
+                if ('student' === type && isStudent) {
+                    wavesurfer.markers[id].remove();
+                }
+                else if ('teacher' === type && !isStudent) {
+                    wavesurfer.markers[id].remove();
+                }
+                wavesurfer.redrawMarks();
+            });
+            // also delete li(s) in DOM
+            if (isStudent)
+                $('#student-comments > li').remove();
+            else
+                $('#teacher-comments > li').remove();
+        },
+        'change-speed': function(e) {
+            wavesurfer.playPause();
+            var value = e.target.dataset && e.target.dataset.value;
+            wavesurfer.setParam('audioRate', value);
+            wavesurfer.playPause();
         }
     };
 
@@ -140,7 +222,6 @@ wavesurfer.on('ready', function() {
         }
     });
 
-    // problème de récupération de l'action si click sur icone
     document.addEventListener('click', function(e) {
         var action = e.target.dataset && e.target.dataset.action;
         if (action && action in eventHandlers) {
@@ -200,23 +281,6 @@ $(document).on("click", ".move-cursor-to", function() {
     wavesurfer.skip(delta);
 });
 
-/*
- $(document).on("click", ".move-backward", function() {
- var time = parseFloat($(this).parents("li").attr("data-time")) - 0.5;
- updateMarker(time, $(this));
- });
- 
- $(document).on("click", ".move-forward", function() {
- var time = parseFloat($(this).parents("li").attr("data-time")) + 0.5;
- updateMarker(time, $(this));
- 
- });$(document).on("click", ".play", function() {
- var time = parseFloat($(this).parents("li").attr("data-time"));
- wavesurfer.backend.play(time, time + 2);
- });
- */
-
-
 // FUNCTIONS
 
 function updateMarker(time, btn) {
@@ -261,38 +325,35 @@ function generateId() {
     return uuid;
 }
 
-function addComment(wsTime, time, id) {
-    /*$('#student-coments').append(
-     '<li data-time="' + wsTime + '" id="' + id + '" class="commment list-group-item">\n\
-     <div class="row">\n\
-     <div class="buttons">\n\
-     <button type="button" class="btn btn-success btn-xs play" title="Play">\n\
-     <span class="glyphicon glyphicon-play"></span>\n\
-     </button>\n\
-     <!--<button type="button" class="btn btn-primary btn-xs edit" title="Edit">\n\
-     <span class="glyphicon glyphicon-pencil"></span>\n\
-     </button>-->\n\
-     <!--<button type="button" class="btn btn-primary btn-xs move-backward" title="Backward 50 ms">\n\
-     <span class="glyphicon glyphicon-backward"></span>\n\
-     </button>-->\n\
-     <button type="button" class="btn btn-primary btn-xs move-to-current-time" title="Move to current time">\n\
-     <span class="glyphicon glyphicon-screenshot"></span>\n\
-     </button>\n\
-     <!--<button type="button" class="btn btn-primary btn-xs move-forward" title="Forward 50 ms">\n\
-     <span class="glyphicon glyphicon-forward"></span>\n\
-     </button>-->\n\
-     <button type="button" class="btn btn-danger btn-xs remove" title="Delete">\n\
-     <span class="glyphicon glyphicon-trash"></span>\n\
-     </button>\n\
-     </div>\n\
-     <h3 class="time">' + time + '</h3>\n\
-     <textarea class="comment-text"></textarea>\n\
-     </div>\n\
-     </li>'
-     );*/
+function addStudentComment(wsTime, time, id) {
 
-    $('#student-coments').append(
-            '<li data-time="' + wsTime + '" id="' + id + '" class="commment list-group-item">\n\
+    // insert new comment in the right place (between previous and next comment)
+
+    // the li after wich we have to create the new comment
+    var liBefore = null;
+    // the li before wich we have to create the new comment
+    var liAfter = null;
+
+    $('#student-comments > li').each(function() {
+
+        var cComment = $(this);
+        var cTime = cComment.attr('data-time');
+        if (cComment && wsTime > cTime) {
+            var nComment = $(this).next();
+            var nTime = nComment.attr('data-time');
+            if (!nComment || nTime > wsTime) {
+                // append new li here
+                liBefore = cComment;
+                return false;
+            }
+        }
+        else if (wsTime < cTime) { // just on marker or we want to place the new comment before the first one
+            liAfter = cComment;
+            return false;
+        }
+    });
+
+    var content = '<li data-time="' + wsTime + '" id="' + id + '" class="commment list-group-item">\n\
                     <div class="row">\n\
                         <div class="buttons col-md-4">\n\
                             <button type="button" class="btn btn-success btn-xs move-cursor-to" title="Move cursor to">\n\
@@ -313,10 +374,84 @@ function addComment(wsTime, time, id) {
                         </div>\n\
                         <textarea class="comment-text"></textarea>\n\
                     </div>\n\
-                    <hr/>\n\
-            </li>'
-            );
+                   </li>';
+
+    // Happend to DOM
+    if (null == liBefore && null == liAfter) {
+        $('#student-comments').append(content);
+    }
+    else if (liBefore && null == liAfter) {
+        $(liBefore).after(content);
+    }
+    else if (liAfter && null == liBefore) {
+        $(liAfter).before(content);
+    }
 }
+
+function addTeacherComment(wsTime, time, id, comment) {
+    // insert new comment in the right place (between previous and next comment)
+
+    // the li after wich we have to create the new comment
+    var liBefore = null;
+    // the li before wich we have to create the new comment
+    var liAfter = null;
+
+    $('#teacher-comments > li').each(function() {
+
+        var cComment = $(this);
+        var cTime = cComment.attr('data-time');
+
+        if (cComment && wsTime > cTime) {
+            var nComment = $(this).next();
+            var nTime = nComment.attr('data-time');
+            if (!nComment || nTime > wsTime) {
+                liBefore = cComment;
+                return false;
+            }
+        }
+        else if (wsTime < cTime) { // just one marker or we want to place the new comment before the first one
+            liAfter = cComment;
+            return false;
+        }
+    });
+
+    var myComment = comment == null ? '' : comment;
+
+    var content = '<li data-time="' + wsTime + '" id="' + id + '" class="commment list-group-item">\n\
+                    <div class="row">\n\
+                        <div class="buttons col-md-4">\n\
+                            <button type="button" class="btn btn-success btn-xs move-cursor-to" title="Move cursor to">\n\
+                                <span class="glyphicon glyphicon-move"></span>\n\
+                            </button>\n\
+                            <button type="button" class="btn btn-primary btn-xs move-to-current-time" title="Move marker to current time">\n\
+                                    <span class="glyphicon glyphicon-screenshot"></span>\n\
+                            </button>\n\
+                            <button type="button" class="btn btn-danger btn-xs remove" title="Delete marker">\n\
+                                <span class="glyphicon glyphicon-trash"></span>\n\
+                            </button>\n\
+                        </div>\n\
+                        <div class="col-md-4">\n\
+                             <span class="time">' + time + '</span>\n\
+                        </div>\n\
+                        <div class="col-md-4">\n\
+                            <label>Commentaire</label>\n\
+                        </div>\n\
+                        <textarea class="comment-text">' + myComment + '</textarea>\n\
+                    </div>\n\
+                   </li>';
+
+    // Happend to DOM
+    if (null == liBefore && null == liAfter) {
+        $('#teacher-comments').append(content);
+    }
+    else if (liBefore && null == liAfter) {
+        $(liBefore).after(content);
+    }
+    else if (liAfter && null == liBefore) {
+        $(liAfter).before(content);
+    }
+}
+
 
 
 /**
@@ -378,32 +513,3 @@ function moveForward() {
     }
     wavesurfer.skip(delta);
 }
-
-// override wavesurfer method in order to allow the set of playback rate
-wavesurfer.playPause = function(playbackRate) {
-    //console.log('passed');
-
-    // base
-    this.backend.isPaused() ? this.play() : this.pause();
-
-    //this.backend.playbackRate(2);
-    //this.backend.isPaused() ? this.play() : this.pause();
-    //this.wavesurfer.backend.source.playbackRate = 2;
-    //console.log(this.backend.webaudio.source);
-
-    /*
-     if (!playbackRate) {
-     playbackRate = 1;
-     }
-     if (this.isLoaded === true) {
-     var audio_context = wavesurfer.backend.ac;
-     var playSound = wavesurfer.backend.ac.createBufferSource();
-     playSound.buffer = wavesurfer.load('example/media/demo.wav');
-     playSound.connect(this.panner);
-     playSound.playbackRate.value = playbackRate;
-     this.panner.connect(this.volume);
-     this.volume.connect(audioContext.destination);
-     
-     }
-     */
-};

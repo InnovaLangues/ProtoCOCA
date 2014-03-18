@@ -117,7 +117,7 @@ body {
 }
 
 
-.commment{
+.comment{
     margin-bottom:20px;
     /*border-bottom:none;*/
     border : none;
@@ -141,8 +141,3 @@ body {
     
 }
 
-#markers{
-    height: 150px;
-    overflow:auto;
-    
-}

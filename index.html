@@ -9,29 +9,24 @@
         <!-- Bootstrap -->
         <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
         <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
-        <!-- jQuery UI -->
-        <link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
-
-        <!-- ?? -->
-        <link rel="stylesheet" href="http://simonwhitaker.github.com/github-fork-ribbon-css/gh-fork-ribbon.css" />
 
         <!-- MY -->
-        <link rel="stylesheet" href="example/css/style.css" />
+        <link rel="stylesheet" href="css/style.css" />
 
         <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.js"></script>
         <!--<script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>-->
         <script type="text/javascript" src="libraries/bootstrap/js/bootstrap.min.js"></script>
 
         <!-- wavesurfer.js -->
-        <script src="build/wavesurfer.min.js"></script>
+        <script src="plugin/wavesurfer.min.js"></script>
 
         <!-- timeline -->
         <script src="plugin/wavesurfer.timeline.js"></script>
 
         <!-- main script -->
-        <script src="example/main.js"></script>
+        <script src="script/main.js"></script>
         <!-- Dynamically change the style of Fill & Scroll buttons -->
-        <script src="example/trivia.js"></script>
+        <script src="script/trivia.js"></script>
     </head>
 
     <body itemscope itemtype="http://schema.org/WebApplication">
@@ -142,7 +137,7 @@
                 <!-- CONTROLS & TOOLS LINE -->
                 <div class="row">
                     <!-- PLAYBACK CONTROL -->
-                    <div class="col-md-5">
+                    <div class="col-md-7">
                         <div class="panel panel-default widget">
 
                             <div class="controls panel-body text-center">
@@ -157,16 +152,31 @@
                                 </button>
                                 <button class="btn btn-primary" data-action="forth">
                                     <i class="glyphicon glyphicon-step-forward" data-action="forth"></i>
-                                </button>                               
+                                </button> 
+                                <button class="btn btn-danger" title="x1" data-action="change-speed" data-value="1">
+                                    x1                                   
+                                </button>
+                                <button class="btn btn-danger" title="x0.85" data-action="change-speed" data-value="0.85"> 
+                                    x0.85                                   
+                                </button>
+                                <button class="btn btn-danger" title="x0.65" data-action="change-speed" data-value="0.65">
+                                    x0.65                                   
+                                </button>
+                               <!--  <button class="btn btn-success" data-action="green-mark">
+                                    <i class="glyphicon glyphicon-flag" data-action="green-mark"></i>
+                                </button>
+                                <button class="btn btn-danger" data-action="red-mark">
+                                    <i class="glyphicon glyphicon-flag" data-action="red-mark"></i>
+                                </button>-->
                                 <button class="btn btn-danger" title="Delete all markers" data-action="delete-marks">
                                     <i class="glyphicon glyphicon-trash" data-action="delete-marks"></i>                                    
-                                </button>
+                                </button>                                
                             </div>
 
                         </div>
                     </div>
                     <!-- STUDENT TOOL (ADD MARKER) -->
-                    <div class="col-md-2">
+                    <div class="col-md-2" id="student-tools">
                         <div class="panel panel-default widget">
                             <div class="panel-heading">
                                 <h3 class="panel-title">Student tools</h3>
@@ -179,7 +189,7 @@
                         </div>                        
                     </div>
                     <!-- TEACHER TOOL (ADD MARKER) -->
-                    <div class="col-md-2">
+                    <div class="col-md-2" id="teacher-tools">
                         <div class="panel panel-default widget">
                             <div class="panel-heading">
                                 <h3 class="panel-title">Teacher tools</h3>
@@ -190,23 +200,37 @@
                                 </button>
                             </div>
                         </div>
-                    </div>  
+                    </div> 
                     <!-- ADD FILE --> 
                     <div class="col-md-3">
                         <div class="lead pull-center" id="drop">
-                            Drag'n'drop your file here!
+                            D&D FILE HERE
                         </div>
                     </div>
                 </div>
                 <!-- STUDENT MARKERs ZONE -->
-                <div class="row">
+                <div class="row" id="student-markers">
                     <div class="col-md-12">
                         <div class="panel panel-default widget">
                             <div class="panel-heading">
                                 <h3 class="panel-title">Student Markers</h3>
                             </div>
-                            <div class="panel-body" id="markers">
-                                <ul class="list-group" id="student-coments">
+                            <div class="panel-body" class="markers">
+                                <ul class="list-group" id="student-comments">
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- TEACHER MARKERs ZONE -->
+                <div class="row" id="teacher-markers">
+                    <div class="col-md-12">
+                        <div class="panel panel-default widget">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Teacher Markers</h3>
+                            </div>
+                            <div class="panel-body" class="markers">
+                                <ul class="list-group" id="teacher-comments">
                                 </ul>
                             </div>
                         </div>

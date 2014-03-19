@@ -22,6 +22,7 @@ WaveSurfer.util.extend(WaveSurfer.Drawer.Canvas, {
             zIndex: 2,
             overflow: 'hidden',
             width: '0',
+            height: this.params.height + 'px',
             borderRight: [
                 this.params.cursorWidth + 'px',
                 'solid',
@@ -41,12 +42,23 @@ WaveSurfer.util.extend(WaveSurfer.Drawer.Canvas, {
             zIndex: 3
         });
 
-        this.canvases = [ waveCanvas, progressCanvas, marksCanvas ];
+        var selectionCanvas = this.wrapper.appendChild(
+            document.createElement('canvas')
+        );
+        this.style(selectionCanvas, {
+            position: 'absolute',
+            zIndex: 0
+        });
+
+        this.canvases = [
+            waveCanvas, progressCanvas, marksCanvas, selectionCanvas
+        ];
 
         this.waveCc = waveCanvas.getContext('2d');
         this.progressCc = progressCanvas.getContext('2d');
         this.progressWave = progressWave;
         this.marksCc = marksCanvas.getContext('2d');
+        this.selectionCc= selectionCanvas.getContext('2d');
     },
 
     updateWidth: function () {
@@ -57,8 +69,7 @@ WaveSurfer.util.extend(WaveSurfer.Drawer.Canvas, {
             canvas.style.width = width;
         }, this);
 
-        this.waveCc.clearRect(0, 0, this.width, this.height);
-        this.progressCc.clearRect(0, 0, this.width, this.height);
+        this.clearWave();
     },
 
     clearWave: function () {
@@ -67,6 +78,7 @@ WaveSurfer.util.extend(WaveSurfer.Drawer.Canvas, {
     },
 
     drawWave: function (peaks, max) {
+        var $ = 0.5 / this.pixelRatio;
         this.waveCc.fillStyle = this.params.waveColor;
         this.progressCc.fillStyle = this.params.progressColor;
 
@@ -74,28 +86,28 @@ WaveSurfer.util.extend(WaveSurfer.Drawer.Canvas, {
         var halfH = this.height / 2;
 
         this.waveCc.beginPath();
-        this.waveCc.moveTo(0, halfH);
+        this.waveCc.moveTo($, halfH);
         this.progressCc.beginPath();
-        this.progressCc.moveTo(0, halfH);
+        this.progressCc.moveTo($, halfH);
         for (var i = 0; i < this.width; i++) {
             var h = Math.round(peaks[i] * coef);
-            this.waveCc.lineTo(i, halfH + h);
-            this.progressCc.lineTo(i, halfH + h);
+            this.waveCc.lineTo(i + $, halfH + h);
+            this.progressCc.lineTo(i + $, halfH + h);
         }
-        this.waveCc.lineTo(this.width, halfH);
-        this.progressCc.lineTo(this.width, halfH);
+        this.waveCc.lineTo(this.width + $, halfH);
+        this.progressCc.lineTo(this.width + $, halfH);
 
-        this.waveCc.moveTo(0, halfH);
-        this.progressCc.moveTo(0, halfH);
+        this.waveCc.moveTo($, halfH);
+        this.progressCc.moveTo($, halfH);
         for (var i = 0; i < this.width; i++) {
             var h = Math.round(peaks[i] * coef);
-            this.waveCc.lineTo(i, halfH - h);
-            this.progressCc.lineTo(i, halfH - h);
+            this.waveCc.lineTo(i + $, halfH - h);
+            this.progressCc.lineTo(i + $, halfH - h);
         }
 
-        this.waveCc.lineTo(this.width, halfH);
+        this.waveCc.lineTo(this.width + $, halfH);
         this.waveCc.fill();
-        this.progressCc.lineTo(this.width, halfH);
+        this.progressCc.lineTo(this.width + $, halfH);
         this.progressCc.fill();
     },
 
@@ -133,5 +145,20 @@ WaveSurfer.util.extend(WaveSurfer.Drawer.Canvas, {
         Object.keys(this.marks).forEach(function (id) {
             this.drawMark(this.marks[id]);
         }, this);
+    },
+
+    drawSelection: function () {
+        this.eraseSelection();
+
+        this.selectionCc.fillStyle = this.params.selectionColor;
+        var x = this.startPercent * this.width;
+        var width = this.endPercent * this.width - x;
+
+        this.selectionCc.fillRect(x, 0, width, this.height);
+    },
+
+    eraseSelection: function () {
+        this.selectionCc.clearRect(0, 0, this.width, this.height);
     }
+
 });

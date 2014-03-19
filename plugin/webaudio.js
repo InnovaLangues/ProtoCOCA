@@ -10,6 +10,7 @@ WaveSurfer.WebAudio = {
             );
         }
         this.params = params;
+        this.loopSelection = this.params.loopSelection;
         this.ac = params.audioContext || this.getAudioContext();
         this.offlineAc = this.getOfflineAudioContext(this.ac.sampleRate);
 
@@ -43,6 +44,9 @@ WaveSurfer.WebAudio = {
                 var time = my.getCurrentTime();
                 if (time > my.scheduledPause) {
                     my.pause();
+                    if (time > my.getDuration()) {
+                        my.fireEvent('finish', time);
+                    }
                 }
                 my.fireEvent('audioprocess', time);
             }
@@ -84,20 +88,37 @@ WaveSurfer.WebAudio = {
     },
 
     clearSource: function () {
-        this.source.disconnect();
-        this.source = null;
+        if (this.source) {
+            this.source.disconnect();
+            this.source = null;
+        }
     },
 
     refreshBufferSource: function () {
-        this.source && this.clearSource();
+        this.clearSource();
         this.source = this.ac.createBufferSource();
+
         if (this.buffer) {
             this.source.buffer = this.buffer;
         }
         this.source.connect(this.gainNode);
     },
 
+    setupLoop: function () {
+        this.lastLoop = 0;
+        this.loopedAtStart = false;
+
+        if (this.loop && this.lastStart <= this.loopEnd) {
+            this.loopedAtStart = true;
+            this.source.loop = true;
+            this.source.loopStart = this.loopStart;
+            this.source.loopEnd = this.loopEnd;
+        }
+    },
+
     setBuffer: function (buffer) {
+        this.clearSource();
+        this.lastLoop = 0;
         this.lastPause = 0;
         this.lastStart = 0;
         this.startTime = 0;
@@ -159,6 +180,8 @@ WaveSurfer.WebAudio = {
         this.paused = false;
         this.scheduledPause = end;
 
+        if (this.loopSelection) this.setupLoop();
+
         if (this.source.start) {
             this.source.start(0, start, end - start);
         } else {
@@ -172,7 +195,14 @@ WaveSurfer.WebAudio = {
      * Pauses the loaded audio.
      */
     pause: function () {
-        this.lastPause = this.lastStart + (this.ac.currentTime - this.startTime);
+        if (this.loopIsActive()) {
+            this.lastPause = this.loopStart +
+                this.ac.currentTime - this.lastLoop;
+        } else {
+            this.lastPause = this.lastStart +
+                (this.ac.currentTime - this.startTime);
+        }
+
         this.paused = true;
         if (this.source) {
             if (this.source.stop) {
@@ -189,10 +219,10 @@ WaveSurfer.WebAudio = {
     /**
      * @returns {Float32Array} Array of peaks.
      */
-    getPeaks: function (length, sampleStep) {
+    getPeaks: function (length) {
         var buffer = this.buffer;
-        var sampleSize = Math.ceil(buffer.length / length);
-        sampleStep = sampleStep || ~~(sampleSize / 10);
+        var sampleSize = buffer.length / length;
+        var sampleStep = ~~(sampleSize / 10);
         var channels = buffer.numberOfChannels;
         var peaks = new Float32Array(length);
 
@@ -200,7 +230,7 @@ WaveSurfer.WebAudio = {
             var chan = buffer.getChannelData(c);
             for (var i = 0; i < length; i++) {
                 var start = ~~(i * sampleSize);
-                var end = start + sampleSize;
+                var end = ~~(start + sampleSize);
                 var peak = 0;
                 for (var j = start; j < end; j += sampleStep) {
                     var value = chan[j];
@@ -210,10 +240,15 @@ WaveSurfer.WebAudio = {
                         peak = -value;
                     }
                 }
-                if (c > 1) {
-                    peaks[i] += peak / channels;
+                if (c > 0) {
+                    peaks[i] += peak;
                 } else {
-                    peaks[i] = peak / channels;
+                    peaks[i] = peak;
+                }
+
+                // Average peak between channels
+                if (c == channels - 1) {
+                    peaks[i] = peaks[i] / channels;
                 }
             }
         }
@@ -222,15 +257,19 @@ WaveSurfer.WebAudio = {
     },
 
     getPlayedPercents: function () {
-        var duration = this.getDuration();
-        return duration > 0 ? this.getCurrentTime() / duration : 0;
+        return (this.getCurrentTime() / this.getDuration()) || 0;
     },
 
     getCurrentTime: function () {
         if (this.isPaused()) {
             return this.lastPause;
         }
-        return this.lastStart + (this.ac.currentTime - this.startTime);
+
+        if (this.loopIsActive()) {
+            return this.loopStart + this.ac.currentTime - this.lastLoop;
+        }
+
+        return  this.lastStart + this.ac.currentTime - this.startTime;
     },
 
     audioContext: null,
@@ -251,6 +290,57 @@ WaveSurfer.WebAudio = {
             )(1, 2, sampleRate);
         }
         return WaveSurfer.WebAudio.offlineAudioContext;
+    },
+
+    destroy: function () {
+        this.pause();
+        this.unAll();
+        this.buffer = null;
+        this.filterNode && this.filterNode.disconnect();
+        this.gainNode.disconnect();
+        this.scriptNode.disconnect();
+    },
+
+    updateSelection: function(startPercent, endPercent) {
+        if (!this.loopSelection) return false;
+
+        var duration = this.getDuration();
+        if (!duration) return;
+
+        this.loop = true;
+        this.loopStart = duration * startPercent;
+        this.loopEnd = duration * endPercent;
+
+        if (this.source) {
+            this.source.loop = this.loop;
+            this.source.loopStart = this.loopStart;
+            this.source.loopEnd = this.loopEnd;
+        }
+    },
+
+    clearSelection: function() {
+        if (!this.loopSelection) return false;
+
+        this.loop = false;
+        this.loopStart = 0;
+        this.loopEnd = 0;
+
+        if (this.source) {
+            this.source.loop = false;
+            this.source.loopStart = this.loopStart;
+            this.source.loopEnd = this.loopEnd;
+        }
+    },
+
+    logLoop: function(){
+        if (this.loopedAtStart) this.lastLoop = this.ac.currentTime;
+    },
+
+    loopIsActive: function () {
+        return this.loopSelection &&
+            this.loop &&
+            this.lastLoop &&
+            this.loopedAtStart;
     }
 };
 

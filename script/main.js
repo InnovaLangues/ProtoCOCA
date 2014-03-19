@@ -30,8 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
         progressColor: 'black',
         loaderColor: 'purple',
         cursorColor: 'navy',
-        markerWidth: 1,
-        audioRate: 1
+        markerWidth: 1
     };
 
     if (location.search.match('scroll')) {
@@ -198,10 +197,28 @@ wavesurfer.on('ready', function() {
                 $('#teacher-comments > li').remove();
         },
         'change-speed': function(e) {
+            // console.log(wavesurfer.backend.source);
+            var value = e.target.dataset && e.target.dataset.value; 
             wavesurfer.playPause();
-            var value = e.target.dataset && e.target.dataset.value;
-            wavesurfer.setParam('audioRate', value);
+            wavesurfer.backend.setPlaybackRate(value);
             wavesurfer.playPause();
+           
+            
+            /*var audio = document.getElementById('audio-test');
+            console.log(audio.playbackRate);
+            audio.playbackRate = value;*/
+            //console.log(listener.dopplerFactor);
+           // var dopplerShift = 1; // Initialize to default value
+           // var dopplerFactor = listener.dopplerFactor;
+            
+            
+            //wavesurfer.backend.source.playbackRate.value = value;
+            //console.log(wavesurfer.backend.source);
+            //wavesurfer.playPause();
+           
+            
+            //wavesurfer.setParam('audioRate', value);
+            //wavesurfer.playPause();
         }
     };
 

@@ -201,6 +201,7 @@ Utils.prototype.getSegmentIndexById = function(id, segments) {
 Utils.prototype.getSegmentByCurrentPosition = function(position, segments) {
     var result = null;
     for (var i = 0; i < segments.length; i++) {
+        // console.log('index ' + i +  ' segment start ' +  segments[i].start + ' segment end ' + segments[i].end + ' position ' + position);
         //s.start < currentTime && s.end > currentTime
         if (segments[i].start < position && segments[i].end > position) {
             result = segments[i];
@@ -277,29 +278,52 @@ Utils.prototype.mergeSegments = function(segment, sIndex, segments, markers) {
     return segments;
 };
 
-Utils.prototype.xhr = function(url, data, progress, callback) {
+Utils.prototype.xhr = function(url, data, callback) {
     var request = new XMLHttpRequest();
+
+    var progress = '';
+    progress += '<div class="modal" id="pleaseWaitDialog" data-backdrop="static" data-keyboard="false">';
+    progress += '<div class="modal-dialog">';
+    progress += '<div class="modal-content">';
+    progress += '   <div class="modal-header">';
+    progress += '       <h1>Processing...</h1>';
+    progress += '   </div>';
+    progress += '   <div class="modal-body">';
+    progress += '       <div class="progress progress-striped">';
+    progress += '           <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">';
+    progress += '           </div>';
+    progress += '       </div>';
+    progress += '   </div>';
+    progress += '</div>';
+    progress += '   </div>';
+    progress += '</div>';
+    $('body').append(progress);
+
     request.onreadystatechange = function() {
-        if (request.readyState === 4 && request.status === 200) {            
+        if (request.readyState === 4 && request.status === 200) {
+            console.log(request.responseText);
             var response = JSON.parse(request.responseText);
-            // console.log(response);
+            
             callback(response);
+            $('.progress-bar').css('width', '0%');
+            $('#pleaseWaitDialog').modal('hide');
         }
     };
 
+    // open modal progress window
+    $('#pleaseWaitDialog').modal();
     request.upload.onprogress = function(e) {
-        if (!progress)
-            return;
-        if (e.lengthComputable) {
-            progress.value = (e.loaded / e.total) * 100;
-            progress.textContent = progress.value; // Fallback for unsupported browsers.
-        }
 
-        if (progress.value === 100) {
-            progress.value = 0;
+        if (e.lengthComputable) {
+            $('.progress-bar').css('width', ((e.loaded / e.total) * 100) + '%');
         }
     };
     request.open('POST', url);
     request.send(data);
+
+};
+
+Utils.prototype.sortMarkers = function (markers){
+    
 };
 

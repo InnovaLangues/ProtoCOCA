@@ -1,13 +1,13 @@
 <?php
 
 // NEEDS 777 permissions on "processed" directory to work
+// TODO CLEAN FILE NAME
 if (isset($_POST["fUrl"])) {
 
     $fUrl = $_POST ["fUrl"];
     if (file_exists($fUrl) && isset($_POST["segments"])) {
         $segments = json_decode($_POST["segments"]);
-        $i = 0;
-        
+        $i = 0;       
         // array of created files url
         $result = [];
         // base directory for processed files
@@ -24,7 +24,7 @@ if (isset($_POST["fUrl"])) {
             }
         }
         else{
-            mkdir($dir, 0755);
+            mkdir($dir, 0777);
         }
         foreach ($segments as $s) {
             $unique_name = $dir . '/' . $i . '_' . $fileName . '.mp3';

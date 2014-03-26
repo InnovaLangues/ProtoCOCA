@@ -19,7 +19,7 @@
         <script type="text/javascript" src="plugin/bootbox.js"></script>
 
         <!-- wavesurfer.js -->
-       <!-- <script src="plugin/wavesurfer.min.js"></script> -->
+        <!-- <script src="plugin/wavesurfer.min.js"></script> -->
 
         <script src="src/wavesurfer.js"></script>
         <script src="src/webaudio.js"></script>
@@ -45,6 +45,8 @@
     </head>
 
     <body itemscope itemtype="http://schema.org/WebApplication">
+
+
 
         <!-- HELP DIALOG  -->
         <div class="modal fade" id="help-dialog" tabindex="-1" role="dialog" aria-labelledby="Help" aria-hidden="true">
@@ -134,7 +136,7 @@
                 <h1 itemprop="name">COCA - PROTO</h1>
             </div>
 
-            <div id="demo">
+            <div id="ui-segments">
                 <!-- TIMELINE -->
                 <div id="wave-timeline"></div>
                 <!-- WAVEFORM -->
@@ -144,6 +146,15 @@
                     </div>
 
                     <!-- Here be the waveform -->
+                </div>
+                <div class="row">
+                    <div id="no-file" class="col-md-12">
+                        <div class="panel panel-default">
+                            <div class="controls panel-body text-center">
+                                <h1>PLease select a file to begin...</h1>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- CONTROLS & TOOLS LINE -->
@@ -202,18 +213,18 @@
                         </div>                        
                     </div>
                     <!-- TEACHER TOOL (ADD MARKER) -->
-                   <!-- <div class="col-md-2" id="teacher-tools">
-                        <div class="panel panel-default widget">
-                            <div class="panel-heading">
-                                <h3 class="panel-title">Teacher tools</h3>
-                            </div>
-                            <div class="panel-body text-center">
-                                <button class="btn btn-danger" data-action="red-mark">
-                                    <i class="glyphicon glyphicon-flag" data-action="red-mark"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>  -->
+                    <!-- <div class="col-md-2" id="teacher-tools">
+                         <div class="panel panel-default widget">
+                             <div class="panel-heading">
+                                 <h3 class="panel-title">Teacher tools</h3>
+                             </div>
+                             <div class="panel-body text-center">
+                                 <button class="btn btn-danger" data-action="red-mark">
+                                     <i class="glyphicon glyphicon-flag" data-action="red-mark"></i>
+                                 </button>
+                             </div>
+                         </div>
+                     </div>  -->
                     <!-- ADD FILE --> 
                     <!--<div class="col-md-3">
                         <div class="lead pull-center" id="drop">
@@ -255,7 +266,7 @@
                                 Create files from segments
                             </button>
                             <button class="btn btn-danger" data-action="red-mark">
-                                    <i class="glyphicon glyphicon-flag" data-action="red-mark"></i>
+                                <i class="glyphicon glyphicon-flag" data-action="red-mark"></i>
                             </button>
                             <button class="btn btn-default" id="save-segments" data-action="save-all-segments" title="Save all segments">
                                 <span class="glyphicon glyphicon-floppy-disk" data-action="save-all-segments"></span>
@@ -272,21 +283,5 @@
                 </div>
             </div>
         </div>
-        <!--<div class="row" id="teacher-markers">
-            <div class="col-md-12">
-                <div class="panel panel-default widget">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Teacher Markers</h3>
-                    </div>
-                    <div class="panel-body markers">
-                        <ul class="list-group" id="teacher-comments">
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>-->
-
-
-        <!--<audio controls="controls" src="media/demo_jpp.mp3" id="audio-test"></audio>-->
     </body>
 </html>

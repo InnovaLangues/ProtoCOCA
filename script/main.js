@@ -1,6 +1,6 @@
 'use strict';
 
-// Create an instance of wavesurfer
+// wavesurfer instance
 var wavesurfer = Object.create(WaveSurfer);
 // wavesurfer timeline
 var timeline;
@@ -19,13 +19,13 @@ var segments = [];
 // audio file url
 var currentAudioUrl = 'media/demo_jpp.mp3';
 
-
+var options;
 
 // Init & load audio file
 document.addEventListener('DOMContentLoaded', function() {
     initUI();
 
-    var options = {
+    options = {
         container: document.querySelector('#waveform'),
         waveColor: 'lightgrey',
         progressColor: 'black',
@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
         options.scrollParent = true;
     }
 
-    /* Progress bar */
+    // Wavesurfer Progress bar
     progressDiv = document.querySelector('#progress-bar');
     var progressBar = progressDiv.querySelector('.progress-bar');
 
@@ -47,8 +47,28 @@ document.addEventListener('DOMContentLoaded', function() {
         progressDiv.style.display = 'block';
         progressBar.style.width = percent + '%';
     });
+
+    // Won't work on iOS until you touch the page
     wavesurfer.on('ready', function() {
-        // progressDiv.style.display = 'none';
+        //progressDiv = document.querySelector('#progress-bar');
+        progressDiv.style.display = 'none';
+        // init time-text with current time
+        $('#time').text(appUtils.secondsToHms(wavesurfer.backend.getCurrentTime()));
+
+        // TIMELINE
+        // avoid creating timeline object twice (after drag&drop for example)
+        if (timeline) {
+            $('#wave-timeline wave').remove();
+        }
+        else {
+            // create timeline object
+            timeline = Object.create(WaveSurfer.Timeline);
+        }
+
+        timeline.init({
+            wavesurfer: wavesurfer,
+            container: '#wave-timeline'
+        });
     });
 
     // listen to progress event
@@ -57,39 +77,16 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Init
-    wavesurfer.init(options);
-
+    //wavesurfer.init(options);
+    progressDiv.style.display = 'none';
     // Load audio from URL
-    wavesurfer.load(currentAudioUrl);
+    //wavesurfer.load(currentAudioUrl);
 
     // Start listening to drag'n'drop on document
     // wavesurfer.bindDragNDrop('#drop');
 });
 
-// Won't work on iOS until you touch the page
-wavesurfer.on('ready', function() {
 
-    //progressDiv = document.querySelector('#progress-bar');
-    progressDiv.style.display = 'none';
-    // init time-text with current time
-    $('#time').text(appUtils.secondsToHms(wavesurfer.backend.getCurrentTime()));
-
-    // TIMELINE
-    // avoid creating timeline object twice (after drag&drop for example)
-    if (timeline) {
-        $('#wave-timeline wave').remove();
-    }
-    else {
-        // create timeline object
-        timeline = Object.create(WaveSurfer.Timeline);
-    }
-
-
-    timeline.init({
-        wavesurfer: wavesurfer,
-        container: '#wave-timeline'
-    });
-});
 
 // Bind buttons and keypresses
 (function() {
@@ -125,7 +122,7 @@ wavesurfer.on('ready', function() {
             else {
                 var newMId = appUtils.generateUUID();
                 if (segments.length > 0) {
-                    // find corresponding segment
+                    // find corresponding segment                    
                     var segment = appUtils.getSegmentByCurrentPosition(position, segments);
                     if (segment) {
                         // find segment index in order to delete it and insert the two new segments at the right place
@@ -253,15 +250,8 @@ wavesurfer.on('ready', function() {
             confirmMsg += '</p>';
             bootbox.confirm(confirmMsg, function(result) {
                 if (result) {
-                    segments = [];
-                    Object.keys(wavesurfer.markers).forEach(function(id) {
-                        var marker = wavesurfer.markers[id];
-                        wavesurfer.markers[id].remove();
-                        wavesurfer.redrawMarks();
-                    });
-                    $('#segments li').remove();
+                    initSegments();
                 }
-                toggleSegmentButtons();
             });
         },
         'save-segment': function(sender) {
@@ -385,7 +375,6 @@ wavesurfer.on('ready', function() {
                 confirmMsg += '</p>';
                 bootbox.confirm(confirmMsg, function(result) {
                     if (result) {
-                        console.log('delete marker and update UI');
                         // segment id
                         var sId = $(sender.target).parents("li").attr("id");
                         var segment = appUtils.getSegmentById(sId, segments);
@@ -406,31 +395,29 @@ wavesurfer.on('ready', function() {
             var content = '';
             content += '<div class="row">';
             content += '    <div class="col-md-12">';
-            content += '        <input type="file" multiple="" id="myFile">';
+            content += '        <input type="file" id="myFile">';
             content += '    </div>';
             content += '</div>';
             bootbox.dialog({
                 message: content,
                 title: "Choose a file to work on",
                 buttons: {
-                    cancel : {
+                    cancel: {
                         label: "Cancel",
                         className: "btn-default"
                     },
                     main: {
                         label: "OK",
                         className: "btn-primary",
-                        
                         callback: function() {
-                            console.log('process file');
                             var selected_file = document.getElementById('myFile').files[0];
-                            if(selected_file){
-                                console.log(selected_file.name);
+                            if (selected_file) {
                                 document.getElementById('myFile').onchange = function() {
                                     // enable OK button
                                 }
                                 // todo upload file to media/ folder
                                 uploadFile(selected_file.name, selected_file, 'media/');
+                                initUI();
                             }
                         }
                     }
@@ -614,15 +601,7 @@ function moveForward() {
  */
 function createSegments() {
 
-    // get markers
-
-    var sStart = 0;
-    var duration = wavesurfer.backend.getDuration();
-    var sEnd = wavesurfer.backend.getDuration();
-    var index = 0;
-
-
-    // if no marker at beginning or end add them to markers
+    // if no marker at beginning add it
     if (appUtils.checkNewMarkerPosition(wavesurfer.markers, 0)) {
         var id = appUtils.generateUUID();
         wavesurfer.mark({
@@ -633,19 +612,31 @@ function createSegments() {
         });
     }
 
-    if (appUtils.checkNewMarkerPosition(wavesurfer.markers, wavesurfer.backend.getDuration())) {
-        console.log('here');
+    if (appUtils.checkNewMarkerPosition(wavesurfer.markers, duration)) {
         var id = appUtils.generateUUID();
         wavesurfer.mark({
             color: 'rgba(255, 0, 0, 1)',
             id: id,
             type: 'teacher',
-            position: wavesurfer.backend.getDuration()
+            position: duration
         });
-        //wavesurfer.redrawMarks();
     }
 
+    var duration = wavesurfer.backend.getDuration();
+    var sStart = 0;
+    var sEnd = duration;
+    var index = 0;
     var markers = wavesurfer.markers;
+
+// Now process that object with it:
+    /*for (var i = 0; i < sort_array.length; i++) {
+        var item = list[sort_array[i].key];
+
+        // now do stuff with each item
+    }*/
+
+    // TODO order markers or find a solution for unordered markers
+    //console.log(markers);
     for (var marker in markers) {
         // current marker position
         if (0 === index)
@@ -662,6 +653,8 @@ function createSegments() {
         }
         index++;
     }
+
+
 }
 
 function showSegments() {
@@ -790,6 +783,16 @@ function drawTeacherMarkers() {
     wavesurfer.mark(red);
 }
 
+function initSegments() {
+    segments = [];
+    Object.keys(wavesurfer.markers).forEach(function(id) {
+        var marker = wavesurfer.markers[id];
+        wavesurfer.markers[id].remove();
+        wavesurfer.redrawMarks();
+    });
+    $('#segments li').remove();
+    toggleSegmentButtons();
+}
 
 function initUI() {
 
@@ -835,31 +838,38 @@ function splitAudio(fUrl, mSeg) {
     formData.append('fUrl', fUrl);
     var temp = [];
     for (var i = 0; i < mSeg.length; i++) {
-        var s = mSeg[i];
+
+        var s = new Object();//.create();//mSeg[i];
         s.start = appUtils.secondsToHms(mSeg[i].start);
         s.end = appUtils.secondsToHms(mSeg[i].end);
+
         temp.push(s);
     }
     formData.append('segments', JSON.stringify(temp));
-
-    // POST the Blob
-    var result = appUtils.xhr('split.php', formData, null, function(response) {
+    // POST
+    var result = appUtils.xhr('split.php', formData, function(response) {
         // return an array of processed url files
         console.log(response);
+
     });
+
+
 }
 
 function uploadFile(filename, file, directory) {
     var formData = new FormData();
-    formData.append('filename', filename);   
-    formData.append('file', file);  
+    formData.append('filename', filename);
+    formData.append('file', file);
     formData.append('directory', directory);
 
-    // POST the Blob
-    var result = appUtils.xhr('save.php', formData, null, function(response) {
+    // POST
+    var result = appUtils.xhr('save.php', formData, function(response) {
         // return an array of processed url files
         //console.log(response);
         currentAudioUrl = response.dirname + '/' + response.basename;
+        wavesurfer.init(options);
+        $('#no-file').remove();
         wavesurfer.load(currentAudioUrl);
+        initSegments();
     });
 }

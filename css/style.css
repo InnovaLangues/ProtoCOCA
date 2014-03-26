@@ -70,10 +70,11 @@ body {
 .controls {
     padding: 30px 0 15px;
     text-align: center;
+    
 }
 
 .controls .btn {
-    margin-bottom: 15px;
+    /*margin-bottom: 15px;*/
 }
 
 @media screen and (min-width: 990px) {
@@ -101,6 +102,7 @@ body {
     left: 5%;
     width: 90%;
 }
+
 
 #drop {
     border: 3px dashed #ddd;
@@ -137,7 +139,16 @@ body {
 }
 
 .help-item-list li{
-    margin-bottom: 5px;
-    
+    margin-bottom: 5px;    
+}
+
+.alert{
+    text-align: center;
+    font-weight: bold;
+}
+
+.confirm{
+    text-align: center;
+    font-weight: bold;
 }
 

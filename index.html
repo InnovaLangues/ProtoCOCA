@@ -7,25 +7,41 @@
         <link href="data:image/gif;" rel="icon" type="image/x-icon" />
 
         <!-- Bootstrap -->
-        <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
-        <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+        <!--<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">-->
 
         <!-- MY -->
         <link rel="stylesheet" href="css/style.css" />
 
-        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.js"></script>
+        <!-- JS -->
+        <script type="text/javascript" src="plugin/jquery.min.js"></script>
         <script type="text/javascript" src="libraries/bootstrap/js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="plugin/bootbox.js"></script>
 
         <!-- wavesurfer.js -->
-        <script src="plugin/wavesurfer.min.js"></script>
+       <!-- <script src="plugin/wavesurfer.min.js"></script> -->
+
+        <script src="src/wavesurfer.js"></script>
+        <script src="src/webaudio.js"></script>
+        <script src="src/drawer.js"></script>
+        <script src="src/drawer.canvas.js"></script>
 
         <!-- timeline -->
         <script src="plugin/wavesurfer.timeline.js"></script>
 
-        <!-- main script -->
-        <script src="script/main.js"></script>
+
         <!-- Dynamically change the style of Fill & Scroll buttons -->
         <script src="script/trivia.js"></script>
+
+        <!-- uuid generator -->
+        <script src="plugin/uuid.js"></script>
+
+        <!-- uuid generator -->
+        <script src="script/Segment.js"></script>
+        <script src="script/Utils.js"></script>
+
+        <!-- my app script -->
+        <script src="script/main.js"></script>
     </head>
 
     <body itemscope itemtype="http://schema.org/WebApplication">
@@ -105,20 +121,17 @@
 
         <div class="container">
             <div class="header">
-                <noindex>
-                    <ul class="nav nav-pills pull-right">
-                        <li><a href="?fill">Fill</a></li>
-                        <li><a href="?scroll">Scroll</a></li>
-                        <li>
-                            <a class="btn" data-toggle="modal" data-target="#help-dialog">
-                                Help
-                            </a>
-                        </li>
-                    </ul>
-                </noindex>
 
+                <ul class="nav pull-right">
+                    <!--<li><a href="?fill">Fill</a></li>
+                    <li><a href="?scroll">Scroll</a></li>-->
+                    <li>
+                        <a class="btn" data-toggle="modal" data-target="#help-dialog">
+                            Help
+                        </a>
+                    </li>
+                </ul>
                 <h1 itemprop="name">COCA - PROTO</h1>
-
             </div>
 
             <div id="demo">
@@ -134,10 +147,10 @@
                 </div>
 
                 <!-- CONTROLS & TOOLS LINE -->
-                <div class="row">
+                <div class="row" id="controls">
                     <!-- PLAYBACK CONTROL -->
-                    <div class="col-md-7">
-                        <div class="panel panel-default widget">
+                    <div class="col-md-12">
+                        <div class="panel panel-default">
 
                             <div class="controls panel-body text-center">
                                 <h4 id="time"></h4>
@@ -161,15 +174,13 @@
                                 <button class="btn btn-danger" title="x0.65" data-action="change-speed" data-value="0.65">
                                     x0.65                                   
                                 </button>
-                               <!--  <button class="btn btn-success" data-action="green-mark">
-                                    <i class="glyphicon glyphicon-flag" data-action="green-mark"></i>
-                                </button>
-                                <button class="btn btn-danger" data-action="red-mark">
-                                    <i class="glyphicon glyphicon-flag" data-action="red-mark"></i>
-                                </button>-->
-                                <button class="btn btn-danger" title="Delete all markers" data-action="delete-marks">
+                                <!--<button class="btn btn-danger" title="Delete all markers" data-action="delete-marks">
                                     <i class="glyphicon glyphicon-trash" data-action="delete-marks"></i>                                    
-                                </button>                                
+                                </button>  -->
+                                <ul class="nav nav-pills pull-right">
+                                    <li><a href="?fill">Fill</a></li>
+                                    <li><a href="?scroll">Scroll</a></li>
+                                </ul>
                             </div>
 
                         </div>
@@ -188,7 +199,7 @@
                         </div>                        
                     </div>
                     <!-- TEACHER TOOL (ADD MARKER) -->
-                    <div class="col-md-2" id="teacher-tools">
+                   <!-- <div class="col-md-2" id="teacher-tools">
                         <div class="panel panel-default widget">
                             <div class="panel-heading">
                                 <h3 class="panel-title">Teacher tools</h3>
@@ -199,13 +210,13 @@
                                 </button>
                             </div>
                         </div>
-                    </div> 
+                    </div>  -->
                     <!-- ADD FILE --> 
-                    <div class="col-md-3">
+                    <!--<div class="col-md-3">
                         <div class="lead pull-center" id="drop">
                             D&D FILE HERE
                         </div>
-                    </div>
+                    </div>-->
                 </div>
                 <!-- STUDENT MARKERs ZONE -->
                 <div class="row" id="student-markers">
@@ -214,29 +225,65 @@
                             <div class="panel-heading">
                                 <h3 class="panel-title">Student Markers</h3>
                             </div>
-                            <div class="panel-body" class="markers">
+                            <div class="panel-body markers">
                                 <ul class="list-group" id="student-comments">
                                 </ul>
                             </div>
                         </div>
                     </div>
                 </div>
-                <!-- TEACHER MARKERs ZONE -->
-                <div class="row" id="teacher-markers">
+                <!-- TEACHER SEGMENT MARKERs ZONE -->
+                <div class="row" id="teacher-segments">
                     <div class="col-md-12">
                         <div class="panel panel-default widget">
                             <div class="panel-heading">
-                                <h3 class="panel-title">Teacher Markers</h3>
-                            </div>
-                            <div class="panel-body" class="markers">
-                                <ul class="list-group" id="teacher-comments">
-                                </ul>
+                                <h3 class="panel-title">SEGMENTS</h3>
                             </div>
                         </div>
+                        <div class="panel-body markers">
+
+                            <button class="btn btn-default" id="auto-draw" data-action="auto-draw-markers">
+                                Draw marker automatically
+                            </button>
+                            <button class="btn btn-default" id="create-segments" data-action="create-segments">
+                                Create segments from markers
+                            </button>
+                            <button class="btn btn-default" id="split-files" data-action="create-files-from-segments">
+                                Create files from segments
+                            </button>
+                            <button class="btn btn-danger" data-action="red-mark">
+                                    <i class="glyphicon glyphicon-flag" data-action="red-mark"></i>
+                            </button>
+                            <button class="btn btn-default" id="save-segments" data-action="save-all-segments" title="Save all segments">
+                                <span class="glyphicon glyphicon-floppy-disk" data-action="save-all-segments"></span>
+                            </button>
+                            <button class="btn btn-danger" data-action="delete-all-segments" title="Delete all segments">
+                                <span class="glyphicon glyphicon-trash" id="del-segments" data-action="delete-all-segments"></span>
+                            </button>
+                        </div>
+
+                        <br/>
+                        <ul class="list-group" id="segments">
+                        </ul>
                     </div>
                 </div>
             </div>
         </div>
-        <audio controls="controls" src="media/demo_jpp.mp3" id="audio-test"></audio>
+        <!--<div class="row" id="teacher-markers">
+            <div class="col-md-12">
+                <div class="panel panel-default widget">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Teacher Markers</h3>
+                    </div>
+                    <div class="panel-body markers">
+                        <ul class="list-group" id="teacher-comments">
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>-->
+
+
+        <!--<audio controls="controls" src="media/demo_jpp.mp3" id="audio-test"></audio>-->
     </body>
 </html>

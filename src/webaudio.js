@@ -15,7 +15,8 @@ WaveSurfer.WebAudio = {
         this.offlineAc = this.getOfflineAudioContext(this.ac.sampleRate);
 
         this.createVolumeNode();
-        this.createScriptNode();
+        this.createScriptNode();        
+        this.setPlaybackRate(this.params.audioRate);
     },
 
     setFilter: function (filterNode) {
@@ -51,6 +52,13 @@ WaveSurfer.WebAudio = {
                 my.fireEvent('audioprocess', time);
             }
         };
+    },
+
+    /**
+     * Set the audio source playback rate.
+     */
+    setPlaybackRate: function (value) {
+        this.playBackrate = value;
     },
 
     /**
@@ -97,6 +105,10 @@ WaveSurfer.WebAudio = {
     refreshBufferSource: function () {
         this.clearSource();
         this.source = this.ac.createBufferSource();
+
+        if (this.playBackrate) {
+            this.source.playbackRate.value = this.playBackrate;
+        }
 
         if (this.buffer) {
             this.source.buffer = this.buffer;
@@ -222,7 +234,7 @@ WaveSurfer.WebAudio = {
     getPeaks: function (length) {
         var buffer = this.buffer;
         var sampleSize = buffer.length / length;
-        var sampleStep = ~~(sampleSize / 10);
+        var sampleStep = ~~(sampleSize / 10) || 1;
         var channels = buffer.numberOfChannels;
         var peaks = new Float32Array(length);
 

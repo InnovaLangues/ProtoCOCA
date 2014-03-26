@@ -240,7 +240,7 @@ wavesurfer.on('ready', function() {
             }
         },
         'create-files-from-segments': function() {
-            console.log('create files from segment with ' + segments);
+            //console.log('create files from segment with ' + segments);
             splitAudio(currentAudioUrl, segments);
         },
         'save-all-segments': function() {
@@ -256,20 +256,10 @@ wavesurfer.on('ready', function() {
                     segments = [];
                     Object.keys(wavesurfer.markers).forEach(function(id) {
                         var marker = wavesurfer.markers[id];
-                        /*var type = marker.type;
-                         // green markers
-                         if ('student' === type && isStudent) {
-                         wavesurfer.markers[id].remove();
-                         }
-                         else if ('teacher' === type && !isStudent) {
-                         wavesurfer.markers[id].remove();
-                         }*/
                         wavesurfer.markers[id].remove();
                         wavesurfer.redrawMarks();
                     });
                     $('#segments li').remove();
-                    //$("#create-segments").prop('disabled', false);
-                    //$("#auto-draw").prop('disabled', false);
                 }
                 toggleSegmentButtons();
             });
@@ -305,7 +295,6 @@ wavesurfer.on('ready', function() {
                 }
                 toggleSegmentButtons();
             });
-
         },
         // move playing cursor to clicked marker time
         'move-cursor-to': function(sender) {
@@ -412,6 +401,41 @@ wavesurfer.on('ready', function() {
                     }
                 });
             }
+        },
+        'upload-file': function(sender) {
+            var content = '';
+            content += '<div class="row">';
+            content += '    <div class="col-md-12">';
+            content += '        <input type="file" multiple="" id="myFile">';
+            content += '    </div>';
+            content += '</div>';
+            bootbox.dialog({
+                message: content,
+                title: "Choose a file to work on",
+                buttons: {
+                    cancel : {
+                        label: "Cancel",
+                        className: "btn-default"
+                    },
+                    main: {
+                        label: "OK",
+                        className: "btn-primary",
+                        
+                        callback: function() {
+                            console.log('process file');
+                            var selected_file = document.getElementById('myFile').files[0];
+                            if(selected_file){
+                                console.log(selected_file.name);
+                                document.getElementById('myFile').onchange = function() {
+                                    // enable OK button
+                                }
+                                // todo upload file to media/ folder
+                                uploadFile(selected_file.name, selected_file, 'media/');
+                            }
+                        }
+                    }
+                }
+            });
         }
     };
 
@@ -550,7 +574,7 @@ function moveBackward() {
             wavesurfer.skip(delta);
         }
     }
-    else {        
+    else {
         wavesurfer.seekTo(0);
     }
 }
@@ -591,32 +615,32 @@ function moveForward() {
 function createSegments() {
 
     // get markers
-   
+
     var sStart = 0;
     var duration = wavesurfer.backend.getDuration();
     var sEnd = wavesurfer.backend.getDuration();
     var index = 0;
-    
-        
-     // if no marker at beginning or end add them to markers
+
+
+    // if no marker at beginning or end add them to markers
     if (appUtils.checkNewMarkerPosition(wavesurfer.markers, 0)) {
         var id = appUtils.generateUUID();
         wavesurfer.mark({
             color: 'rgba(255, 0, 0, 1)',
             id: id,
             type: 'teacher',
-            position : 0
+            position: 0
         });
     }
-    
-    if(appUtils.checkNewMarkerPosition(wavesurfer.markers, wavesurfer.backend.getDuration())){
+
+    if (appUtils.checkNewMarkerPosition(wavesurfer.markers, wavesurfer.backend.getDuration())) {
         console.log('here');
         var id = appUtils.generateUUID();
         wavesurfer.mark({
             color: 'rgba(255, 0, 0, 1)',
             id: id,
             type: 'teacher',
-            position : wavesurfer.backend.getDuration()
+            position: wavesurfer.backend.getDuration()
         });
         //wavesurfer.redrawMarks();
     }
@@ -782,11 +806,6 @@ function initUI() {
         $("#student-markers").css('display', 'none');
         $("#student-tools").css('display', 'none');
     }
-    
-   
-
-    //$("#create-segments").prop('disabled', true);
-    //$("#auto-draw").prop('disabled', false);
     toggleSegmentButtons();
 }
 
@@ -812,66 +831,35 @@ function toggleSegmentButtons() {
 
 
 function splitAudio(fUrl, mSeg) {
-    // load file
-    console.log('split with seg ' + mSeg);
     var formData = new FormData();
     formData.append('fUrl', fUrl);
     var temp = [];
-    for(var i = 0; i < mSeg.length; i++){
-
+    for (var i = 0; i < mSeg.length; i++) {
         var s = mSeg[i];
         s.start = appUtils.secondsToHms(mSeg[i].start);
         s.end = appUtils.secondsToHms(mSeg[i].end);
         temp.push(s);
     }
     formData.append('segments', JSON.stringify(temp));
-   
-    // POST the Blob
-    xhr('split.php', formData, null, function(fileURL) {
 
+    // POST the Blob
+    var result = appUtils.xhr('split.php', formData, null, function(response) {
+        // return an array of processed url files
+        console.log(response);
     });
 }
 
-function xhr(url, data, progress, callback) {
-    var request = new XMLHttpRequest();
-    request.onreadystatechange = function() {
-        if (request.readyState === 4 && request.status === 200) {
-            //callback(request.responseText);
-            var response = JSON.parse(request.responseText);
-            console.log(response);
-            //TrackManager.addTrack(track);
-            //console.log('success');
-            //console.log(track);
+function uploadFile(filename, file, directory) {
+    var formData = new FormData();
+    formData.append('filename', filename);   
+    formData.append('file', file);  
+    formData.append('directory', directory);
 
-            /*if ('video' === track.type) {
-                var html = '';
-                html += '<video id="video-2" controls="controls"  width="480" height="270">';
-                html += '   <source src="' + track.url + '" type="video/webm" ></source>';
-                html += '</video>';
-                $("#video-2-container").children().remove();
-                $("#video-2-container").append(html);
-                initPlayer2();
-            }
-            else if ('audio' === track.type) {
-                sound2 = new Audio(track.url);
-            }*/
-        }
-    };
-
-    request.upload.onprogress = function(e) {
-        if (!progress)
-            return;
-        if (e.lengthComputable) {
-            progress.value = (e.loaded / e.total) * 100;
-            progress.textContent = progress.value; // Fallback for unsupported browsers.
-        }
-
-        if (progress.value === 100) {
-            progress.value = 0;
-        }
-    };
-    request.open('POST', url);
-    request.send(data);
+    // POST the Blob
+    var result = appUtils.xhr('save.php', formData, null, function(response) {
+        // return an array of processed url files
+        //console.log(response);
+        currentAudioUrl = response.dirname + '/' + response.basename;
+        wavesurfer.load(currentAudioUrl);
+    });
 }
-
-

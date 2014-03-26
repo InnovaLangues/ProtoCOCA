@@ -23,38 +23,38 @@ Utils.prototype.generateUUID = function() {
 Utils.prototype.secondsToHms = function secondsToHms(d) {
     d = Number(d);
     if (d > 0) {
-       /*
-        var h = Math.floor(d / 3600);
-        var m = Math.floor(d % 3600 / 60);
-        var s = Math.floor(d % 3600 % 60);
+        /*
+         var h = Math.floor(d / 3600);
+         var m = Math.floor(d % 3600 / 60);
+         var s = Math.floor(d % 3600 % 60);
+         
+         //var str = d.toString();
+         //var substr = str.split('.');
+         
+         //var ms = substr[1].substring(0, 2);
+         return ((h > 0 ? h + ":" : "00:") + (m > 0 ? (h > 0 && m < 10 ? "00" : "") + m + ":" : "00:") + (s < 10 ? "00" : "") + s);
+         //return ((h > 0 ? h + ":" : "00:") + (m > 0 ? (h > 0 && m < 10 ? "00" : "") + m + ":" : "00:") + (s < 10 ? "00" : "") + s + ":" + ms);
+         */
+        var hours = Math.floor(d / 3600);
+        var minutes = Math.floor(d % 3600 / 60);
+        var seconds = Math.floor(d % 3600 % 60);
 
-        //var str = d.toString();
-        //var substr = str.split('.');
+        // ms
+        var str = d.toString();
+        var substr = str.split('.');
+        var ms = substr[1].substring(0, 2);
 
-        //var ms = substr[1].substring(0, 2);
-        return ((h > 0 ? h + ":" : "00:") + (m > 0 ? (h > 0 && m < 10 ? "00" : "") + m + ":" : "00:") + (s < 10 ? "00" : "") + s);
-        //return ((h > 0 ? h + ":" : "00:") + (m > 0 ? (h > 0 && m < 10 ? "00" : "") + m + ":" : "00:") + (s < 10 ? "00" : "") + s + ":" + ms);
-        */
-       var hours = Math.floor(d / 3600);     
-       var minutes = Math.floor(d % 3600 / 60);     
-       var seconds = Math.floor(d % 3600 % 60); 
-       
-       // ms
-       var str = d.toString();
-       var substr = str.split('.');
-       var ms = substr[1].substring(0, 2);
-       
-       if (hours < 10) {
-           hours = "0" + hours; 
-       }     
-       if (minutes < 10) { 
-           minutes = "0" + minutes; 
-       }     
-       if (seconds < 10) { 
-           seconds = "0" + seconds; 
-       }     
-       var time = hours + ':' + minutes + ':' + seconds + ':' + ms;    
-       return time; 
+        if (hours < 10) {
+            hours = "0" + hours;
+        }
+        if (minutes < 10) {
+            minutes = "0" + minutes;
+        }
+        if (seconds < 10) {
+            seconds = "0" + seconds;
+        }
+        var time = hours + ':' + minutes + ':' + seconds + ':' + ms;
+        return time;
     }
     else {
 
@@ -277,7 +277,29 @@ Utils.prototype.mergeSegments = function(segment, sIndex, segments, markers) {
     return segments;
 };
 
+Utils.prototype.xhr = function(url, data, progress, callback) {
+    var request = new XMLHttpRequest();
+    request.onreadystatechange = function() {
+        if (request.readyState === 4 && request.status === 200) {            
+            var response = JSON.parse(request.responseText);
+            // console.log(response);
+            callback(response);
+        }
+    };
 
+    request.upload.onprogress = function(e) {
+        if (!progress)
+            return;
+        if (e.lengthComputable) {
+            progress.value = (e.loaded / e.total) * 100;
+            progress.textContent = progress.value; // Fallback for unsupported browsers.
+        }
 
-
+        if (progress.value === 100) {
+            progress.value = 0;
+        }
+    };
+    request.open('POST', url);
+    request.send(data);
+};
 

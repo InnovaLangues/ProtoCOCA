@@ -422,6 +422,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
             });
+        },
+        'open-project': function(sender) {
+            console.log('not implemented yet');
         }
     };
 

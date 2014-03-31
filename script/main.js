@@ -21,23 +21,26 @@ var currentAudioUrl = 'media/demo_jpp.mp3';
 
 var options;
 
+var maxZoom = 50;
+var minZoom = 13;
+
 // Init & load audio file
 document.addEventListener('DOMContentLoaded', function() {
     initUI();
-
     options = {
-        container: document.querySelector('#waveform'),
-        waveColor: 'lightgrey',
-        progressColor: 'black',
-        loaderColor: 'purple',
-        cursorColor: 'navy',
-        markerWidth: 1
+        container:      document.querySelector('#waveform'),
+        waveColor:      'lightgrey',
+        progressColor:  'black',
+        loaderColor:    'purple',
+        cursorColor:    'navy',
+        markerWidth:    1,
+        minPxPerSec:    minZoom
     };
 
-    if (location.search.match('scroll')) {
+    /*if (location.search.match('scroll')) {
         options.minPxPerSec = 100;
         options.scrollParent = true;
-    }
+    }*/
 
     // Wavesurfer Progress bar
     progressDiv = document.querySelector('#progress-bar');
@@ -76,12 +79,7 @@ document.addEventListener('DOMContentLoaded', function() {
         $('#time').text(appUtils.secondsToHms(wavesurfer.backend.getCurrentTime()));
     });
 
-    // Init
-    //wavesurfer.init(options);
-    progressDiv.style.display = 'none';
-
-    // Start listening to drag'n'drop on document
-    // wavesurfer.bindDragNDrop('#drop');
+    progressDiv.style.display = 'none';   
 });
 
 
@@ -249,7 +247,7 @@ document.addEventListener('DOMContentLoaded', function() {
             confirmMsg += '</p>';
             bootbox.confirm(confirmMsg, function(result) {
                 if (result) {
-                    initSegments();
+                    initSegmentsAndMarkers();
                 }
             });
         },
@@ -413,7 +411,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             if (selected_file) {
                                 document.getElementById('myFile').onchange = function() {
                                     // enable OK button
-                                }
+                                };
                                 // todo upload file to media/ folder
                                 uploadFile(selected_file.name, selected_file, 'media/');
                                 initUI();
@@ -425,6 +423,23 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         'open-project': function(sender) {
             console.log('not implemented yet');
+            //initWavesurfer();
+        },
+        'zoom-in': function(sender) {
+            if (wavesurfer.minPxPerSec < maxZoom) {
+                //wavesurfer.params.fillParent = false;
+                wavesurfer.params.scrollParent = true;
+                wavesurfer.minPxPerSec += 1;
+                wavesurfer.drawBuffer();
+            }
+        },
+        'zoom-out': function(sender) {
+            //initWavesurfer();
+            if (wavesurfer.minPxPerSec > minZoom) {
+                wavesurfer.params.scrollParent = true;
+                wavesurfer.minPxPerSec -= 1;
+                wavesurfer.drawBuffer();
+            }
         }
     };
 
@@ -774,13 +789,14 @@ function drawTeacherMarkers() {
     wavesurfer.mark(red);
 }
 
-function initSegments() {
+function initSegmentsAndMarkers() {
     segments = [];
-    Object.keys(wavesurfer.markers).forEach(function(id) {
-        var marker = wavesurfer.markers[id];
-        wavesurfer.markers[id].remove();
-        wavesurfer.redrawMarks();
-    });
+    wavesurfer.clearMarks();
+    /*Object.keys(wavesurfer.markers).forEach(function(id) {
+     var marker = wavesurfer.markers[id];
+     wavesurfer.markers[id].remove();
+     wavesurfer.redrawMarks();
+     });*/
     $('#segments li').remove();
     toggleSegmentButtons();
 }
@@ -854,12 +870,24 @@ function uploadFile(filename, file, directory) {
     formData.append('directory', directory);
 
     // POST
-    var result = appUtils.xhr('save.php', formData, function(response) {
+    appUtils.xhr('save.php', formData, function(response) {
         // return an array of processed url files
         currentAudioUrl = response.dirname + '/' + response.basename;
-        wavesurfer.init(options);
-        $('#no-file').remove();
-        wavesurfer.load(currentAudioUrl);
-        initSegments();
+        initWavesurfer(currentAudioUrl);
     });
+}
+
+function initWavesurfer(file) {
+
+    wavesurfer.init(options);
+    $('#no-file').remove();
+    if (file)
+        wavesurfer.load(file);
+    else {
+        wavesurfer.load('media/demo_jpp.mp3');
+    }
+    initSegmentsAndMarkers();
+    
+     // Start listening to drag'n'drop on document
+    // wavesurfer.bindDragNDrop('#drop');
 }

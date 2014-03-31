@@ -29,10 +29,6 @@
         <!-- timeline -->
         <script src="plugin/wavesurfer.timeline.js"></script>
 
-
-        <!-- Dynamically change the style of Fill & Scroll buttons -->
-        <script src="script/trivia.js"></script>
-
         <!-- uuid generator -->
         <script src="plugin/uuid.js"></script>
 
@@ -125,8 +121,7 @@
             <div class="header">
 
                 <ul class="nav pull-right">
-                    <!--<li><a href="?fill">Fill</a></li>
-                    <li><a href="?scroll">Scroll</a></li>-->
+                 
                     <li>
                         <a class="btn" data-toggle="modal" data-target="#help-dialog">
                             Help
@@ -205,13 +200,17 @@
                                 <button class="btn btn-primary" title="Choose a project" data-action="open-project">
                                     <i class="glyphicon glyphicon-list-alt" data-action="open-project"></i>                        
                                 </button>
+
+                                <button class="btn btn-default" data-action="zoom-in" title="zoom in">
+                                    <span class="glyphicon glyphicon-zoom-in" data-action="zoom-in"></span>
+                                </button>
+                                <button class="btn btn-default" data-action="zoom-out" title="zoom out">
+                                    <span class="glyphicon glyphicon-zoom-out" data-action="zoom-out"></span>
+                                </button>
                                 <!--<button class="btn btn-danger" title="Delete all markers" data-action="delete-marks">
                                     <i class="glyphicon glyphicon-trash" data-action="delete-marks"></i>                                    
                                 </button>  -->
-                                <ul class="nav nav-pills pull-right">
-                                    <li><a href="?fill">Fill</a></li>
-                                    <li><a href="?scroll">Scroll</a></li>
-                                </ul>
+                                
                             </div>
 
                         </div>

@@ -1,14 +1,14 @@
-(function (root, factory) {
+(function(root, factory) {
     if (typeof define === 'function' && define.amd) {
         define(['wavesurfer'], factory);
     } else {
         root.WaveSurfer.Timeline = factory(root.WaveSurfer);
     }
-}(this, function (WaveSurfer) {
+}(this, function(WaveSurfer) {
     'use strict';
 
     WaveSurfer.Timeline = {
-        init: function (params) {
+        init: function(params) {
             this.params = params;
             var wavesurfer = this.wavesurfer = params.wavesurfer;
 
@@ -17,9 +17,15 @@
             }
 
             var drawer = this.drawer = this.wavesurfer.drawer;
+            var my = this;
+            wavesurfer.on('redraw', function() {
+                //tl.updateCanvasStyle();      
+                //tl.updateCanvasStyle();
+                //tl.drawTimeCanvas();
+            });
 
             this.container = 'string' == typeof params.container ?
-                document.querySelector(params.container) : params.container;
+                    document.querySelector(params.container) : params.container;
 
             if (!this.container) {
                 throw Error('No container for WaveSurfer timeline');
@@ -42,12 +48,11 @@
 
             wavesurfer.drawer.wrapper.onscroll = this.updateScroll.bind(this);
         },
-
-        createWrapper: function () {
+        createWrapper: function() {
             var wsParams = this.wavesurfer.params;
             this.wrapper = this.container.appendChild(
-                document.createElement('wave')
-            );
+                    document.createElement('wave')
+                    );
             this.drawer.style(this.wrapper, {
                 display: 'block',
                 position: 'relative',
@@ -65,17 +70,16 @@
             }
 
             var my = this;
-            this.wrapper.addEventListener('click', function (e) {
+            this.wrapper.addEventListener('click', function(e) {
                 e.preventDefault();
                 var relX = 'offsetX' in e ? e.offsetX : e.layerX;
                 my.fireEvent('click', (relX / my.scrollWidth) || 0);
             });
         },
-
-        createCanvas: function () {
+        createCanvas: function() {
             var canvas = this.canvas = this.wrapper.appendChild(
-                document.createElement('canvas')
-            );
+                    document.createElement('canvas')
+                    );
 
             this.timeCc = canvas.getContext('2d');
 
@@ -84,22 +88,20 @@
                 zIndex: 4
             });
         },
-
-        updateCanvasStyle: function () {
+        updateCanvasStyle: function() {
             var width = Math.round(this.width / this.pixelRatio) + 'px';
             this.canvas.width = this.width;
             this.canvas.height = this.height;
             this.canvas.style.width = width;
         },
-
         drawTimeCanvas: function() {
             var backend = this.wavesurfer.backend,
-                wsParams = this.wavesurfer.params,
-                duration = backend.getDuration();
+                    wsParams = this.wavesurfer.params,
+                    duration = backend.getDuration();
 
             if (wsParams.fillParent && !wsParams.scrollParent) {
                 var width = this.drawer.getWidth();
-                var pixelsPerSecond = width/duration;
+                var pixelsPerSecond = width / duration;
             } else {
                 var width = backend.getDuration() * wsParams.minPxPerSec;
                 var pixelsPerSecond = wsParams.minPxPerSec;
@@ -109,24 +111,24 @@
 
             if (duration > 0) {
                 var curPixel = 0,
-                    curSeconds = 0,
-                    totalSeconds = parseInt(duration, 10) + 1,
-                    timeInterval = (pixelsPerSecond < 10) ? 10 : 1,
-                    formatTime = function(seconds) {
-                        if (seconds/60 > 1) {
-                            var minutes = parseInt(seconds / 60),
-                                seconds = parseInt(seconds % 60);
-                            seconds = (seconds < 10) ? '0' + seconds : seconds;
-                            return '' + minutes + ':' + seconds;
-                        } else {
-                            return seconds;
-                        }
-                    };
+                        curSeconds = 0,
+                        totalSeconds = parseInt(duration, 10) + 1,
+                        timeInterval = (pixelsPerSecond < 10) ? 10 : 1,
+                        formatTime = function(seconds) {
+                            if (seconds / 60 > 1) {
+                                var minutes = parseInt(seconds / 60),
+                                        seconds = parseInt(seconds % 60);
+                                seconds = (seconds < 10) ? '0' + seconds : seconds;
+                                return '' + minutes + ':' + seconds;
+                            } else {
+                                return seconds;
+                            }
+                        };
 
                 var height1 = this.height - 4,
-                    height2 = (this.height * (this.notchPercentHeight / 100.0)) - 4;
+                        height2 = (this.height * (this.notchPercentHeight / 100.0)) - 4;
 
-                for (var i = 0; i < totalSeconds/timeInterval; i++) {
+                for (var i = 0; i < totalSeconds / timeInterval; i++) {
                     if (i % 10 == 0) {
                         this.timeCc.fillStyle = this.primaryColor;
                         this.timeCc.fillRect(curPixel, 0, 1, height1);
@@ -149,8 +151,7 @@
                 }
             }
         },
-
-        updateScroll: function(e){
+        updateScroll: function(e) {
             this.wrapper.scrollLeft = e.target.scrollLeft;
         }
     };

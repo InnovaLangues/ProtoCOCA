@@ -265,7 +265,6 @@ var WaveSurfer = {
                 this.getDuration() * this.minPxPerSec
             );
         }
-
         this.drawer.drawPeaks(this.backend.getPeaks(length), length);
         this.drawer.progress(this.backend.getPlayedPercents());
         this.redrawMarks();

@@ -28,9 +28,11 @@ if (isset($_POST["fUrl"])) {
         }
         foreach ($segments as $s) {
             $unique_name = $dir . '/' . $i . '_' . $fileName . '.mp3';
+            
             $command = 'avconv -i ' . $fUrl . ' -ss ' . $s->start . ' -t ' . $s->end . ' -acodec copy -y ' . $unique_name;
 
             exec($command);
+            
             array_push($result, $unique_name);
             $i ++;
         }

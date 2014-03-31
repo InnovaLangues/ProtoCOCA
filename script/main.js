@@ -79,8 +79,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Init
     //wavesurfer.init(options);
     progressDiv.style.display = 'none';
-    // Load audio from URL
-    //wavesurfer.load(currentAudioUrl);
 
     // Start listening to drag'n'drop on document
     // wavesurfer.bindDragNDrop('#drop');
@@ -121,6 +119,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             else {
                 var newMId = appUtils.generateUUID();
+                // update segments concerned by the new marker if any
                 if (segments.length > 0) {
                     // find corresponding segment                    
                     var segment = appUtils.getSegmentByCurrentPosition(position, segments);
@@ -601,6 +600,7 @@ function moveForward() {
  */
 function createSegments() {
 
+    var duration = wavesurfer.backend.getDuration();
     // if no marker at beginning add it
     if (appUtils.checkNewMarkerPosition(wavesurfer.markers, 0)) {
         var id = appUtils.generateUUID();
@@ -612,6 +612,7 @@ function createSegments() {
         });
     }
 
+    // if no marker at the end ad it
     if (appUtils.checkNewMarkerPosition(wavesurfer.markers, duration)) {
         var id = appUtils.generateUUID();
         wavesurfer.mark({
@@ -622,39 +623,26 @@ function createSegments() {
         });
     }
 
-    var duration = wavesurfer.backend.getDuration();
+
     var sStart = 0;
     var sEnd = duration;
     var index = 0;
     var markers = wavesurfer.markers;
 
-// Now process that object with it:
-    /*for (var i = 0; i < sort_array.length; i++) {
-        var item = list[sort_array[i].key];
+    // sort markers by position
+    var sortedMarkers = appUtils.getSortedMarkersArray(markers);
 
-        // now do stuff with each item
-    }*/
-
-    // TODO order markers or find a solution for unordered markers
-    //console.log(markers);
-    for (var marker in markers) {
-        // current marker position
-        if (0 === index)
-            sStart = markers[marker].position;
-
+    for (var index in sortedMarkers) {
         // get next marker position
         var nMarker = appUtils.getNextMarker(markers, sStart, duration);
         var segment = new Segment();
         if (nMarker) {
             sEnd = nMarker.position;
-            segment.init(appUtils.generateUUID(), currentAudioUrl, 'parentid', 'Enter a name', 'text', sStart, markers[marker].id, sEnd, nMarker.id);
+            segment.init(appUtils.generateUUID(), currentAudioUrl, 'parentid', 'Enter a name', 'text', sStart, sortedMarkers[index].id, sEnd, nMarker.id);
             segments.push(segment);
             sStart = sEnd;
         }
-        index++;
     }
-
-
 }
 
 function showSegments() {
@@ -795,6 +783,8 @@ function initSegments() {
 }
 
 function initUI() {
+    // if a wave has already be drawned    
+    $('#waveform wave').remove();
 
     // hide student / teacher part depending on who i am
     if (isStudent) {
@@ -852,8 +842,6 @@ function splitAudio(fUrl, mSeg) {
         console.log(response);
 
     });
-
-
 }
 
 function uploadFile(filename, file, directory) {
@@ -865,7 +853,6 @@ function uploadFile(filename, file, directory) {
     // POST
     var result = appUtils.xhr('save.php', formData, function(response) {
         // return an array of processed url files
-        //console.log(response);
         currentAudioUrl = response.dirname + '/' + response.basename;
         wavesurfer.init(options);
         $('#no-file').remove();

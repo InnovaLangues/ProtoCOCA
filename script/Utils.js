@@ -16,25 +16,14 @@ Utils.prototype.generateUUID = function() {
 };
 
 /**
- * Convert a time data (125.25 in a hh:mm:ss string)
+ * Convert a number (125.25 in a hh:mm:ss:ms string)
  * @param {numeric} d
  * @returns {string} hh:mm:ss
  */
 Utils.prototype.secondsToHms = function secondsToHms(d) {
     d = Number(d);
     if (d > 0) {
-        /*
-         var h = Math.floor(d / 3600);
-         var m = Math.floor(d % 3600 / 60);
-         var s = Math.floor(d % 3600 % 60);
-         
-         //var str = d.toString();
-         //var substr = str.split('.');
-         
-         //var ms = substr[1].substring(0, 2);
-         return ((h > 0 ? h + ":" : "00:") + (m > 0 ? (h > 0 && m < 10 ? "00" : "") + m + ":" : "00:") + (s < 10 ? "00" : "") + s);
-         //return ((h > 0 ? h + ":" : "00:") + (m > 0 ? (h > 0 && m < 10 ? "00" : "") + m + ":" : "00:") + (s < 10 ? "00" : "") + s + ":" + ms);
-         */
+
         var hours = Math.floor(d / 3600);
         var minutes = Math.floor(d % 3600 / 60);
         var seconds = Math.floor(d % 3600 % 60);
@@ -301,9 +290,9 @@ Utils.prototype.xhr = function(url, data, callback) {
 
     request.onreadystatechange = function() {
         if (request.readyState === 4 && request.status === 200) {
-            console.log(request.responseText);
+            //console.log(request.responseText);
             var response = JSON.parse(request.responseText);
-            
+
             callback(response);
             $('.progress-bar').css('width', '0%');
             $('#pleaseWaitDialog').modal('hide');
@@ -323,7 +312,15 @@ Utils.prototype.xhr = function(url, data, callback) {
 
 };
 
-Utils.prototype.sortMarkers = function (markers){
-    
+// create an sorted array of markers
+Utils.prototype.getSortedMarkersArray = function(markers) {
+    var sortable = [];
+    for (var id in markers) {
+        sortable.push(markers[id]);
+    }
+    sortable.sort(function(a, b) {
+        return a.position - b.position;
+    });
+    return sortable;
 };
 

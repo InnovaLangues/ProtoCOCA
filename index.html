@@ -150,8 +150,22 @@
                 <div class="row">
                     <div id="no-file" class="col-md-12">
                         <div class="panel panel-default">
-                            <div class="controls panel-body text-center">
-                                <h1>PLease select a file to begin...</h1>
+                            <div class="controls panel-body">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <h3>Select a file...</h3>
+
+                                        <button class="btn btn-primary" title="Choose a file" data-action="upload-file">
+                                            <i class="glyphicon glyphicon-upload" data-action="upload-file"></i>                        
+                                        </button>
+                                        <h3>...or an existing project...</h3>
+                                        <button class="btn btn-primary" title="Choose a project" data-action="open-project">
+                                            <i class="glyphicon glyphicon-list-alt" data-action="open-project"></i>                        
+                                        </button>
+                                        <h3>to begin.</h3>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -187,6 +201,9 @@
                                 </button>
                                 <button class="btn btn-primary" title="Choose a file" data-action="upload-file">
                                     <i class="glyphicon glyphicon-upload" data-action="upload-file"></i>                        
+                                </button>
+                                <button class="btn btn-primary" title="Choose a project" data-action="open-project">
+                                    <i class="glyphicon glyphicon-list-alt" data-action="open-project"></i>                        
                                 </button>
                                 <!--<button class="btn btn-danger" title="Delete all markers" data-action="delete-marks">
                                     <i class="glyphicon glyphicon-trash" data-action="delete-marks"></i>                                    

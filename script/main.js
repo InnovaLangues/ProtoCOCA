@@ -430,6 +430,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 //wavesurfer.params.fillParent = false;
                 wavesurfer.params.scrollParent = true;
                 wavesurfer.minPxPerSec += 1;
+                wavesurfer.params.minPxPerSec += 1;
                 wavesurfer.drawBuffer();
             }
         },

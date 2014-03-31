@@ -18,10 +18,9 @@
 
             var drawer = this.drawer = this.wavesurfer.drawer;
             var my = this;
-            wavesurfer.on('redraw', function() {
-                //tl.updateCanvasStyle();      
-                //tl.updateCanvasStyle();
-                //tl.drawTimeCanvas();
+            wavesurfer.on('redraw', function() {     
+                my.updateCanvasStyle();
+                my.drawTimeCanvas();
             });
 
             this.container = 'string' == typeof params.container ?

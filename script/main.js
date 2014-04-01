@@ -439,6 +439,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (wavesurfer.minPxPerSec > minZoom) {
                 wavesurfer.params.scrollParent = true;
                 wavesurfer.minPxPerSec -= 1;
+                wavesurfer.params.minPxPerSec -= 1;
                 wavesurfer.drawBuffer();
             }
         }

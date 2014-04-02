@@ -97,7 +97,6 @@ Utils.prototype.getNextMarker = function(markers, cMarkerPosition, totalLength) 
         var cPosition = markers[marker].position;
         // is marker position greater than reference marker position ? (many markers can verify this condition)
         if (cPosition > sPosition) {
-
             // get delta between cursor current position && marker position
             var tempDelta = cPosition - sPosition;
             // is it the nearest next marker ?
@@ -168,7 +167,6 @@ Utils.prototype.getSegmentById = function(id, segments) {
     for (var i = 0; i < segments.length; i++) {
         if (segments[i].id === id) {
             result = segments[i];
-            //console.log(i +  ' segment id ' +  segments[i].id);
             break;
         }
     }
@@ -180,7 +178,6 @@ Utils.prototype.getSegmentIndexById = function(id, segments) {
     for (var i = 0; i < segments.length; i++) {
         if (segments[i].id === id) {
             result = i;
-            //console.log(i +  ' segment id ' +  segments[i].id);
             break;
         }
     }
@@ -190,11 +187,8 @@ Utils.prototype.getSegmentIndexById = function(id, segments) {
 Utils.prototype.getSegmentByCurrentPosition = function(position, segments) {
     var result = null;
     for (var i = 0; i < segments.length; i++) {
-        // console.log('index ' + i +  ' segment start ' +  segments[i].start + ' segment end ' + segments[i].end + ' position ' + position);
-        //s.start < currentTime && s.end > currentTime
         if (segments[i].start < position && segments[i].end > position) {
             result = segments[i];
-            //console.log(i +  ' segment id ' +  segments[i].id);
             break;
         }
     }
@@ -290,9 +284,7 @@ Utils.prototype.xhr = function(url, data, callback) {
 
     request.onreadystatechange = function() {
         if (request.readyState === 4 && request.status === 200) {
-            //console.log(request.responseText);
             var response = JSON.parse(request.responseText);
-
             callback(response);
             $('.progress-bar').css('width', '0%');
             $('#pleaseWaitDialog').modal('hide');
@@ -302,14 +294,12 @@ Utils.prototype.xhr = function(url, data, callback) {
     // open modal progress window
     $('#pleaseWaitDialog').modal();
     request.upload.onprogress = function(e) {
-
         if (e.lengthComputable) {
             $('.progress-bar').css('width', ((e.loaded / e.total) * 100) + '%');
         }
     };
     request.open('POST', url);
     request.send(data);
-
 };
 
 // create an sorted array of markers
@@ -322,5 +312,17 @@ Utils.prototype.getSortedMarkersArray = function(markers) {
         return a.position - b.position;
     });
     return sortable;
+};
+
+
+Utils.prototype.getSegmentCollectionIndexById = function (collection, id){
+    var result = null;
+    for (var i = 0; i < collection.length; i++) {
+        if (collection[i].id === id) {
+            result = i;
+            break;
+        }
+    }
+    return result;
 };
 

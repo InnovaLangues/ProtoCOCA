@@ -1039,7 +1039,7 @@ function saveSegmentCollection(scName) {
         collId = appUtils.generateUUID();
         curCollection = null;
         curCollection = new SegmentCollection(collId, scName, currentAudioId, currentAudioUrl, sArray);
-        sCList.push(JSON.stringify(saved));
+        sCList.push(JSON.stringify(curCollection));
     }    
     isEditing = true;
 }

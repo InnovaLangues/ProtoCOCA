@@ -152,3 +152,20 @@ body {
     font-weight: bold;
 }
 
+#segments-container{
+    margin-top: 15px;
+}
+
+.segment{
+    margin-top: 5px;
+}
+
+.marker-info{
+    margin-top: 15px;
+}
+
+/* TABLE FOR Segement collection */
+#pjct-table{
+    
+}
+

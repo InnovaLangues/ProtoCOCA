@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-        <title>COCA - PROTO</title>
+        <title>COCA - PROTOTYPE</title>
 
         <link href="data:image/gif;" rel="icon" type="image/x-icon" />
 
@@ -32,9 +32,10 @@
         <!-- uuid generator -->
         <script src="plugin/uuid.js"></script>
 
-        <!-- uuid generator -->
-        <script src="script/Segment.js"></script>
+        <!-- my libraries -->        
         <script src="script/Utils.js"></script>
+        <script src="script/Segment.js"></script>
+        <script src="script/SegmentCollection.js"></script>
 
         <!-- my app script -->
         <script src="script/main.js"></script>
@@ -119,17 +120,17 @@
 
         <div class="container">
             <div class="header">
-
                 <ul class="nav pull-right">
-                 
                     <li>
                         <a class="btn" data-toggle="modal" data-target="#help-dialog">
                             Help
                         </a>
                     </li>
                 </ul>
-                <h1 itemprop="name">COCA - PROTO</h1>
+                <h1 itemprop="name">PROTOTYPE - COCA</h1>
             </div>
+            
+            <!-- SEGMENTS CREATION UI -->
 
             <div id="ui-segments">
                 <!-- TIMELINE -->
@@ -207,10 +208,9 @@
                                 <button class="btn btn-default" data-action="zoom-out" title="zoom out">
                                     <span class="glyphicon glyphicon-zoom-out" data-action="zoom-out"></span>
                                 </button>
-                                <!--<button class="btn btn-danger" title="Delete all markers" data-action="delete-marks">
-                                    <i class="glyphicon glyphicon-trash" data-action="delete-marks"></i>                                    
-                                </button>  -->
-                                
+                                <button class="btn btn-default" data-action="init-screation" title="init all">
+                                    <span class="glyphicon glyphicon-refresh" data-action="init-screation"></span>
+                                </button>
                             </div>
 
                         </div>
@@ -228,25 +228,6 @@
                             </div>
                         </div>                        
                     </div>
-                    <!-- TEACHER TOOL (ADD MARKER) -->
-                    <!-- <div class="col-md-2" id="teacher-tools">
-                         <div class="panel panel-default widget">
-                             <div class="panel-heading">
-                                 <h3 class="panel-title">Teacher tools</h3>
-                             </div>
-                             <div class="panel-body text-center">
-                                 <button class="btn btn-danger" data-action="red-mark">
-                                     <i class="glyphicon glyphicon-flag" data-action="red-mark"></i>
-                                 </button>
-                             </div>
-                         </div>
-                     </div>  -->
-                    <!-- ADD FILE --> 
-                    <!--<div class="col-md-3">
-                        <div class="lead pull-center" id="drop">
-                            D&D FILE HERE
-                        </div>
-                    </div>-->
                 </div>
                 <!-- STUDENT MARKERs ZONE -->
                 <div class="row" id="student-markers">
@@ -269,35 +250,37 @@
                             <div class="panel-heading">
                                 <h3 class="panel-title">SEGMENTS</h3>
                             </div>
-                        </div>
-                        <div class="panel-body markers">
 
-                            <button class="btn btn-default" id="auto-draw" data-action="auto-draw-markers">
-                                Draw marker automatically
-                            </button>
-                            <button class="btn btn-default" id="create-segments" data-action="create-segments">
-                                Create segments from markers
-                            </button>
-                            <button class="btn btn-default" id="split-files" data-action="create-files-from-segments">
-                                Create files from segments
-                            </button>
-                            <button class="btn btn-danger" data-action="red-mark">
-                                <i class="glyphicon glyphicon-flag" data-action="red-mark"></i>
-                            </button>
-                            <button class="btn btn-default" id="save-segments" data-action="save-all-segments" title="Save all segments">
-                                <span class="glyphicon glyphicon-floppy-disk" data-action="save-all-segments"></span>
-                            </button>
-                            <button class="btn btn-danger" data-action="delete-all-segments" title="Delete all segments">
-                                <span class="glyphicon glyphicon-trash" id="del-segments" data-action="delete-all-segments"></span>
-                            </button>
+                            <div class="panel-body">
+                                <button class="btn btn-default" id="auto-draw" data-action="auto-draw-markers">
+                                    Draw marker automatically
+                                </button>
+                                <button class="btn btn-default" id="create-segments" data-action="create-segments">
+                                    Create segments from markers
+                                </button>
+                                <button class="btn btn-default" id="split-files" data-action="create-files-from-segments">
+                                    Create files from segments
+                                </button>
+                                <button class="btn btn-danger" data-action="red-mark">
+                                    <i class="glyphicon glyphicon-flag" data-action="red-mark"></i>
+                                </button>
+                                <button class="btn btn-default" id="save-segments" data-action="save-all-segments" title="Save all segments">
+                                    <span class="glyphicon glyphicon-floppy-disk" data-action="save-all-segments"></span>
+                                </button>
+                                <button class="btn btn-danger" data-action="delete-all-segments" title="Delete all segments">
+                                    <span class="glyphicon glyphicon-trash" id="del-segments" data-action="delete-all-segments"></span>
+                                </button>
+                                <div id="segments-container">
+                                    <ul class="list-group" id="segments">
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
-
-                        <br/>
-                        <ul class="list-group" id="segments">
-                        </ul>
                     </div>
                 </div>
             </div>
+            
+            <!-- AUDIO EDITOR UI -->
         </div>
     </body>
 </html>

@@ -315,10 +315,11 @@ Utils.prototype.getSortedMarkersArray = function(markers) {
 };
 
 
-Utils.prototype.getSegmentCollectionIndexById = function (collection, id){
+Utils.prototype.getSegmentCollectionIndexById = function(collection, id) {
     var result = null;
     for (var i = 0; i < collection.length; i++) {
-        if (collection[i].id === id) {
+        var current = JSON.parse(collection[i]);  
+        if (current.id === id) {
             result = i;
             break;
         }

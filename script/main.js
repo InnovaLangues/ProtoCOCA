@@ -196,7 +196,6 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         'delete-marks': function() {
             // depending on who i am (student or teacher) only remove red or green markers
-
             Object.keys(wavesurfer.markers).forEach(function(id) {
                 var marker = wavesurfer.markers[id];
                 var type = marker.type;
@@ -508,6 +507,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         callback: function() {
                             var selected_index = $('input[name="collection"]:checked').val();
                             if (selected_index) {
+                                curCollection = null; 
                                 curCollection = JSON.parse(sCList[selected_index]);
                                 isEditing = true;
                                 drawSegmentCollection(curCollection);
@@ -772,7 +772,10 @@ function showSegments(_segments) {
         li += ' <div class="row">';
         li += '     <div class="col-md-10">';
         //li += '         <label> Nom du segment : </label> <input type="text" name="sName" id="' + s.id + '-name" value="' + s.name + '" />';
-        li += '         <label>Segment : </label> <input type="text" name="sName" id="' + s.id + '-name" value="' + i + '_' + s.fUrl.split('/')[1].split('.')[0] + '" />';
+        if(isEditing)
+            li += '         <label>Segment : </label> <input type="text" name="sName" id="' + s.id + '-name" value="' + s.name + '" />';
+        else
+            li += '         <label>Segment : </label> <input type="text" name="sName" id="' + s.id + '-name" value="' + i + '_' + s.fUrl.split('/')[1].split('.')[0] + '" />';
         li += '     </div>';
         li += '     <div class="col-md-2">';
         li += '         <button type="button" class="btn btn-danger btn-xs" data-action="delete-segment" title="Delete segment">';
@@ -996,7 +999,7 @@ function saveSegmentCollection(scName) {
     $('#segments li').each(function(index) {
         var id = this.id;
         var name = $('#' + id + '-name').val() === '' ? index + '_' + currentAudioUrl.split('/')[1].split('.')[0] : $('#' + id + '-name').val();
-        var comment = $('#' + id + '-comment').val();
+        var comment = '';//$('#' + id + '-comment').val();
         var start = $(this).attr('data-start');
         var mStartId = $(this).attr('data-mstartid');
         var end = $(this).attr('data-end');
@@ -1032,8 +1035,6 @@ function saveSegmentCollection(scName) {
         curCollection.name = scName;
         var index = appUtils.getSegmentCollectionIndexById(sCList, collId);
         sCList.splice(index, 1, JSON.stringify(curCollection));
-        console.log(sCList);
-        //sCollection = new SegmentCollection(collId, scName, currentAudioId, currentAudioUrl, sArray);
     }
     else {
         collId = appUtils.generateUUID();

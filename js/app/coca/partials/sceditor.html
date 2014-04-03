@@ -1,0 +1,21 @@
+<p>this is the wave editor</p>
+
+<!-- SEGMENT COLLECTION CREATION -->
+<div id="ui-segments-creation">
+    <ul>
+        <li ng-repeat="sc in segmentCollections">
+            {{sc.name}}
+            <p>number of segments : {{sc.segments.length}}</p>
+            <ul>
+                <li ng-repeat="s in sc.segments">
+                    <p>segment name : {{ s.name}}</p>
+                </li>
+            </ul>
+            <p>USER {{ user.name}}</p>
+        </li>
+    </ul>
+    <div ng-controller="WaveSurferCtrl">
+        <div ng-include="'js/app/wavesurfer/partials/wavesurfer.html'"></div>
+    </div>
+
+</div>

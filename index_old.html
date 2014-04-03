@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="utf-8">
+        <title>COCA - PROTOTYPE</title>
+
+        <link href="data:image/gif;" rel="icon" type="image/x-icon" />
+
+        <!-- Bootstrap -->
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+        <!--<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">-->
+
+        <!-- MY -->
+        <link rel="stylesheet" href="css/style.css" />
+
+        <!-- JS -->
+        <script type="text/javascript" src="js/libs/jquery.min.js"></script>
+        <script type="text/javascript" src="js/libs/bootstrap.min.js"></script>
+        <script type="text/javascript" src="js/libs/bootbox.js"></script>
+
+        <!-- wavesurfer.js -->
+        <!-- <script src="js/libs/wavesurfer.min.js"></script> -->
+
+        <script src="js/libs/src/wavesurfer.js"></script>
+        <script src="js/libs/src/webaudio.js"></script>
+        <script src="js/libs/src/drawer.js"></script>
+        <script src="js/libs/src/drawer.canvas.js"></script>
+
+        <!-- timeline -->
+        <script src="js/libs/wavesurfer.timeline.js"></script>
+
+        <!-- uuid generator -->
+        <script src="js/libs/uuid.js"></script>
+
+        <!-- my libraries -->        
+        <script src="js/Utils.js"></script>
+        <script src="js/Segment.js"></script>
+        <script src="js/SegmentCollection.js"></script>
+
+        <!-- my app script -->
+        <script src="js/main.js"></script>
+    </head>
+
+    <body itemscope itemtype="http://schema.org/WebApplication">
+        <!-- HELP DIALOG  -->
+        <div class="modal fade" id="help-dialog" tabindex="-1" role="dialog" aria-labelledby="Help" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="help-modal-label">HELP</h4>
+                    </div>
+                    <div class="modal-body">
+                        <h4><b>Process</b></h4>
+                        <ul class="nav help-item-list">
+                            <li>  
+                                <h5><b>Listen to the file</b></h5>
+                                <p>Listen to the file by pressing play button. You can pause the sound by pressing the same button again.</p>
+                            </li>
+                            <li> 
+                                <h5><b>Markers</b></h5>
+                                <p>Add a marker if you encouter a problem. This will create a marker and a comment text area in the Student Marker zone.</p>
+                            </li>
+                            <li> 
+                                <h5><b>Loop playback</b></h5>
+                                <p>Select a zone by click & drag. The zone will play loop when reached.</p>
+                                <p>Double click to remove the zone.</p>
+                            </li>
+                        </ul>  
+                        <hr/>
+                        <h4><b>Playback & navigation controls</b></h4>
+                        <ul class="nav help-item-list">
+                            <li> 
+                                <button class="btn btn-primary">
+                                    <i class="glyphicon glyphicon-play"></i> / <i class="glyphicon glyphicon-pause"></i>
+                                </button> 
+                                <span>Begin to play or pause sound</span>
+                                <br/>
+                                <span><i><small>Keyboard shortcut : [spacebar]</small></i></span>
+                            </li>
+                            <li class="nav"> 
+                                <button class="btn btn-primary">
+                                    <i class="glyphicon glyphicon-step-backward"></i>
+                                </button> 
+                                <span>Go to previous marker or to the begining of the file</span>                               
+                                <br/>
+                                <span><i><small>Keyboard shortcut : [left arrow]</small></i></span>
+                            </li>
+                            <li class="nav"> 
+                                <button class="btn btn-primary">
+                                    <i class="glyphicon glyphicon-step-forward"></i>
+                                </button> 
+                                <span>Go to next marker or to the end of the file</span>
+                                <br/>
+                                <span><i><small>Keyboard shortcut : [right arrow]</small></i></span>
+                            </li>
+                        </ul>  
+                        <hr/>
+                        <h4><b>Tools</b></h4>
+                        <ul class="nav help-item-list">
+                            <li> 
+                                <button class="btn btn-success">
+                                    <i class="glyphicon glyphicon-flag"></i>
+                                </button> 
+                                <span>Press to add a marker when you encouter a problem.</span>
+                                <br/>
+                                <span><i><small>Keyboard shortcut : [up arrow]</small></i></span>
+                            </li>
+                        </ul>  
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="header">
+                <ul class="nav pull-right">
+                    <li>
+                        <a class="btn" data-toggle="modal" data-target="#help-dialog">
+                            Help
+                        </a>
+                    </li>
+                </ul>
+                <h1 itemprop="name">PROTOTYPE - COCA</h1>
+            </div>
+
+            <!-- SEGMENTS CREATION UI -->
+
+            <div id="ui-segments">
+                <!-- TIMELINE -->
+                <div id="wave-timeline"></div>
+                <!-- WAVEFORM -->
+                <div id="waveform">
+                    <div class="progress progress-striped active" id="progress-bar">
+                        <div class="progress-bar progress-bar-info"></div>
+                    </div>
+
+                    <!-- Here be the waveform -->
+                </div>
+                <div class="row">
+                    <div id="no-file" class="col-md-12">
+                        <div class="panel panel-default">
+                            <div class="controls panel-body">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <h3>Select a file...</h3>
+
+                                        <button class="btn btn-primary" title="Choose a file" data-action="upload-file">
+                                            <i class="glyphicon glyphicon-upload" data-action="upload-file"></i>                        
+                                        </button>
+                                        <h3>...or an existing project...</h3>
+                                        <button class="btn btn-primary" title="Choose a project" data-action="open-project">
+                                            <i class="glyphicon glyphicon-list-alt" data-action="open-project"></i>                        
+                                        </button>
+                                        <h3>to begin.</h3>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CONTROLS & TOOLS LINE -->
+                <div class="row" id="controls">
+                    <!-- PLAYBACK CONTROL -->
+                    <div class="col-md-12">
+                        <div class="panel panel-default">
+
+                            <div class="controls panel-body text-center">
+                                <h4 id="time"></h4>
+                                <button class="btn btn-primary" data-action="back">
+                                    <i class="glyphicon glyphicon-step-backward" data-action="back"></i>
+                                </button>
+                                <button class="btn btn-primary" data-action="play">
+                                    <i class="glyphicon glyphicon-play" data-action="play"></i>
+                                    /
+                                    <i class="glyphicon glyphicon-pause" data-action="play"></i>
+                                </button>
+                                <button class="btn btn-primary" data-action="forth">
+                                    <i class="glyphicon glyphicon-step-forward" data-action="forth"></i>
+                                </button> 
+                                <button class="btn btn-danger" title="x1" data-action="change-speed" data-value="1">
+                                    x1                                   
+                                </button>
+                                <button class="btn btn-danger" title="x0.85" data-action="change-speed" data-value="0.85"> 
+                                    x0.85                                   
+                                </button>
+                                <button class="btn btn-danger" title="x0.65" data-action="change-speed" data-value="0.65">
+                                    x0.65                                   
+                                </button>
+                                <button class="btn btn-primary" title="Choose a file" data-action="upload-file">
+                                    <i class="glyphicon glyphicon-upload" data-action="upload-file"></i>                        
+                                </button>
+                                <button class="btn btn-primary" title="Choose a project" data-action="open-project">
+                                    <i class="glyphicon glyphicon-list-alt" data-action="open-project"></i>                        
+                                </button>
+
+                                <button class="btn btn-default" data-action="zoom-in" title="zoom in">
+                                    <span class="glyphicon glyphicon-zoom-in" data-action="zoom-in"></span>
+                                </button>
+                                <button class="btn btn-default" data-action="zoom-out" title="zoom out">
+                                    <span class="glyphicon glyphicon-zoom-out" data-action="zoom-out"></span>
+                                </button>
+                                <button class="btn btn-default" data-action="init-screation" title="init all">
+                                    <span class="glyphicon glyphicon-refresh" data-action="init-screation"></span>
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- STUDENT TOOL (ADD MARKER) -->
+                    <div class="col-md-2" id="student-tools">
+                        <div class="panel panel-default widget">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Student tools</h3>
+                            </div>
+                            <div class="panel-body text-center">
+                                <button class="btn btn-success" data-action="green-mark">
+                                    <i class="glyphicon glyphicon-flag" data-action="green-mark"></i>
+                                </button>
+                            </div>
+                        </div>                        
+                    </div>
+                </div>
+                <!-- STUDENT MARKERs ZONE -->
+                <div class="row" id="student-markers">
+                    <div class="col-md-12">
+                        <div class="panel panel-default widget">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Student Markers</h3>
+                            </div>
+                            <div class="panel-body markers">
+                                <ul class="list-group" id="student-comments">
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- TEACHER SEGMENT MARKERs ZONE -->
+                <div class="row" id="teacher-segments">
+                    <div class="col-md-12">
+                        <div class="panel panel-default widget">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">SEGMENTS</h3>
+                            </div>
+
+                            <div class="panel-body">
+                                <button class="btn btn-default" id="auto-draw" data-action="auto-draw-markers">
+                                    Draw marker automatically
+                                </button>
+                                <button class="btn btn-default" id="create-segments" data-action="create-segments">
+                                    Create segments from markers
+                                </button>
+                                <button class="btn btn-default" id="split-files" data-action="create-files-from-segments">
+                                    Create files from segments
+                                </button>
+                                <button class="btn btn-danger" data-action="red-mark">
+                                    <i class="glyphicon glyphicon-flag" data-action="red-mark"></i>
+                                </button>
+                                <button class="btn btn-default" id="save-segments" data-action="save-all-segments" title="Save all segments">
+                                    <span class="glyphicon glyphicon-floppy-disk" data-action="save-all-segments"></span>
+                                </button>
+                                <button class="btn btn-danger" data-action="delete-all-segments" title="Delete all segments">
+                                    <span class="glyphicon glyphicon-trash" id="del-segments" data-action="delete-all-segments"></span>
+                                </button>
+                                <div id="segments-container">
+                                    <ul class="list-group" id="segments">
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AUDIO EDITOR UI -->
+        </div>
+    </body>
+</html>

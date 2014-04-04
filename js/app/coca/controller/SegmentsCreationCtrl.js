@@ -27,6 +27,9 @@ function SegmentsCreationCtrl($scope, $modal, UtilsFactory) {
         formData.append('file', file);
         formData.append('directory', directory);
         
+        $scope.data = formData;
+        $scope.php = 'save.php';
+        
         
         var pmodal = $modal.open({
             templateUrl:'js/app/progress/partials/progress.html',

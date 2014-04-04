@@ -1,7 +1,40 @@
-<p>this is the wave editor</p>
 
-<!-- SEGMENT COLLECTION CREATION -->
+<!-- SEGMENT COLLECTION EDITOR -->
 <div id="ui-segments-creation">
+    <!-- WAVEFORM AND TIMELINE AND CONTROLS --> 
+    <!--<div ng-controller="WaveSurferCtrl">
+        <div ng-include="'js/app/wavesurfer/partials/wavesurfer.html'" onload="initWs()"></div>
+    </div>-->
+
+    <div ng-if="!file.id">
+        <!-- NO PROJECT OR FILE SELECTED -->
+        <div class="row">
+            <div id="no-file" class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="controls panel-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h3>Select a file...</h3>
+
+                                <button class="btn btn-primary" title="Choose a file" ng-click="loadFile()">
+                                    <i class="glyphicon glyphicon-upload" data-action="upload-file"></i>                        
+                                </button>
+                                <h3>...or an existing project...</h3>
+                                <button class="btn btn-primary" title="Choose a project" data-action="open-project">
+                                    <i class="glyphicon glyphicon-list-alt" data-action="open-project"></i>                        
+                                </button>
+                                <h3>to begin.</h3>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div ng-if="file.id">
+        <div my-wave-surfer="" ng-attr-url="file.url" ng-attr-fid="file.id"></div>
+    </div>
     <ul>
         <li ng-repeat="sc in segmentCollections">
             {{sc.name}}
@@ -11,11 +44,7 @@
                     <p>segment name : {{ s.name}}</p>
                 </li>
             </ul>
-            <p>USER {{ user.name}}</p>
         </li>
     </ul>
-    <div ng-controller="WaveSurferCtrl">
-        <div ng-include="'js/app/wavesurfer/partials/wavesurfer.html'"></div>
-    </div>
 
 </div>

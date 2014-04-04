@@ -1,0 +1,17 @@
+<div class="modal-header">
+    <h4 class="modal-title">
+        Pick a file to work on
+    </h4>
+</div>
+
+<div class="modal-body">
+    <div class="col-md-12">
+        <input type="file" id="myFile" onchange="angular.element(this).scope().fileNameChanged(this)" accept="audio/mpeg">
+    </div>
+ 
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-primary" ng-click="ok()" ng-disabled="!files.length > 0">OK</button>
+    <button class="btn btn-default cancel" ng-click="cancel()">cancel</button>
+</div>

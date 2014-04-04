@@ -19,15 +19,5 @@ function MainCtrl($scope, $location) {
         return page === currentRoute ? 'active' : '';
     };
 
-    $scope.loadWaveEditor = function() {
-        $location.url('/weditor');
-    };
-
-    $scope.loadScEditor = function() {
-        $location.url('/sceditor');
-    };
-
-    $scope.loadPlEditor = function() {
-        $location.url('/pleditor');
-    };
+   
 }

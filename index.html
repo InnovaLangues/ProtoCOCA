@@ -20,6 +20,9 @@
         <script type="text/javascript" src="js/libs/angular/angular.min.js"></script>
         <script type="text/javascript" src="js/libs/angular/angular-route.min.js"></script>
         <script type="text/javascript" src="js/libs/angular/angular-resource.min.js"></script>
+        <script type="text/javascript" src="js/libs/angular/angular-animate.min.js"></script>
+        <script type="text/javascript" src="js/libs/angular/angular-loader.min.js"></script>
+        <script type="text/javascript" src="js/libs/angular/angular-ui-bootstrap.min.js"></script>
 
         <!-- wavesurfer.js -->
         <!-- <script src="js/libs/wavesurfer.min.js"></script> -->
@@ -43,10 +46,15 @@
         <!-- my app script -->
         <!--<script src="js/main.js"></script>-->
         <script src="js/app/coca/controller/MainCtrl.js"></script>
+        <script src="js/app/coca/factory/UtilsFactory.js"></script>
         <script src="js/app/coca/controller/SegmentsCreationCtrl.js"></script>
         <script src="js/app/coca/controller/WaveEditorCtrl.js"></script>
         <script src="js/app/coca/controller/PlaylistCreationCtrl.js"></script>
         <script src="js/app/wavesurfer/controller/WaveSurferCtrl.js"></script>
+        <script src="js/app/wavesurfer/factory/WaveSurferFactory.js"></script>
+        <script src="js/app/uploadmodal/controller/UploadModalCtrl.js"></script>
+        <script src="js/app/progress/controller/ProgressModalCtrl.js"></script>
+        <script src="js/app/wavesurfer/directives/WaveSurferDirective.js"></script>
         <script src="js/app/coca/cocaApp.js"></script>
     </head>
     <body>
@@ -69,9 +77,9 @@
                         <!-- Collect the nav links, forms, and other content for toggling -->
                         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                             <ul class="nav navbar-nav">
-                                <li ng-class="navClass('weditor')"><a href="" ng-click="loadWaveEditor()">WaveEditor</a></li>
-                                <li ng-class="navClass('sceditor')"><a href="" ng-click="loadScEditor()">Segments</a></li>
-                                <li ng-class="navClass('pleditor')"><a href="" ng-click="loadPlEditor()">Playlists</a></li>
+                                <li ng-class="navClass('weditor')"><a href="#/weditor">WaveEditor</a></li>
+                                <li ng-class="navClass('sceditor')"><a href="#/sceditor">Segments</a></li>
+                                <li ng-class="navClass('pleditor')"><a href="#/pleditor">Playlists</a></li>
                             </ul>
                             <ul class="nav navbar-nav navbar-right">
                                 <li>
@@ -91,6 +99,7 @@
                         </div>
                     </div>
                 </nav>
+           
                 <!-- VIEWS -->
                 <div ng-view>
                     

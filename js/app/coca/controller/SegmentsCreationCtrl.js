@@ -4,8 +4,47 @@
  * 
  * @param {type} $scope scope
  */
-function SegmentsCreationCtrl($scope) {
+function SegmentsCreationCtrl($scope, $modal, UtilsFactory) {
+    //$scope.wavesurfer = Object.create('WaveSurfer');
+    $scope.file = null;//{'url' :'media/demo_jpp.mp3', 'id':'45'};
+    $scope.isEditing = false;
+    var utils = UtilsFactory.getUtil();
 
+    $scope.loadFile = function() {
+        var modal = $modal.open({
+            templateUrl: 'js/app/uploadmodal/partials/upload-file.html',
+            controller: 'UploadModalCtrl'
+        });
+        modal.result.then(function(files) {      
+            $scope.uploadFile(files[0].name, files[0], 'media/');
+            //$scope.file = {'url' :'media/demo_jpp.mp3', 'id':'45'};
+        });
+    };
+
+    $scope.uploadFile = function(filename, file, directory) {
+        var formData = new FormData();
+        formData.append('filename', filename);
+        formData.append('file', file);
+        formData.append('directory', directory);
+        
+        
+        var pmodal = $modal.open({
+            templateUrl:'js/app/progress/partials/progress.html',
+            controller: 'ProgressModalCtrl'
+        });
+        pmodal.result.then(function(result) {
+            console.log(result);
+        });
+
+        // POST
+       /* utils.xhr('save.php', formData, function(response) {
+            var url = response.dirname + '/' + response.basename;
+            var id = utils.generateUUID();
+            $scope.isEditing = false;
+            $scope.file = {'url' : url, 'id': id};
+            
+        });*/
+    };
 
     // existing segmentCollections
     $scope.segmentCollections = [

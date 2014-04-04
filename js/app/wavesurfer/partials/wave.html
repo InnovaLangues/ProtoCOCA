@@ -1,0 +1,59 @@
+<!-- TIMELINE -->
+<div id="wave-timeline"></div>
+<!-- WAVEFORM -->
+<div id="waveform">
+    <div class="progress progress-striped active" id="progress-bar">
+        <div class="progress-bar progress-bar-info"></div>
+    </div>
+
+    <!-- Here be the waveform -->
+</div>
+
+<!-- CONTROLS & TOOLS LINE -->
+<div class="row" id="controls">
+    <!-- PLAYBACK CONTROL -->
+    <div class="col-md-12">
+        <div class="panel panel-default">
+
+            <div class="controls panel-body text-center">
+                <h4 id="time"></h4>
+                <button class="btn btn-primary" data-action="back">
+                    <i class="glyphicon glyphicon-step-backward" data-action="back"></i>
+                </button>
+                <button class="btn btn-primary" data-action="play">
+                    <i class="glyphicon glyphicon-play" data-action="play"></i>
+                    /
+                    <i class="glyphicon glyphicon-pause" data-action="play"></i>
+                </button>
+                <button class="btn btn-primary" data-action="forth">
+                    <i class="glyphicon glyphicon-step-forward" data-action="forth"></i>
+                </button> 
+                <button class="btn btn-danger" title="x1" data-action="change-speed" data-value="1">
+                    x1                                   
+                </button>
+                <button class="btn btn-danger" title="x0.85" data-action="change-speed" data-value="0.85"> 
+                    x0.85                                   
+                </button>
+                <button class="btn btn-danger" title="x0.65" data-action="change-speed" data-value="0.65">
+                    x0.65                                   
+                </button>
+                <button class="btn btn-primary" title="Choose a file" ng-click="loadFile()">
+                    <i class="glyphicon glyphicon-upload"></i>                        
+                </button>
+                <button class="btn btn-primary" title="Choose a project" data-action="open-project">
+                    <i class="glyphicon glyphicon-list-alt" data-action="open-project"></i>                        
+                </button>
+
+                <button class="btn btn-default" data-action="zoom-in" title="zoom in">
+                    <span class="glyphicon glyphicon-zoom-in" data-action="zoom-in"></span>
+                </button>
+                <button class="btn btn-default" data-action="zoom-out" title="zoom out">
+                    <span class="glyphicon glyphicon-zoom-out" data-action="zoom-out"></span>
+                </button>
+                <button class="btn btn-default" data-action="init-screation" title="init all">
+                    <span class="glyphicon glyphicon-refresh" data-action="init-screation"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

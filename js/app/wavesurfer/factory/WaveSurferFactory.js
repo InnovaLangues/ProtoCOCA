@@ -4,91 +4,108 @@
  * WaveSurferFactory
  */
 function WaveSurferFactory(UtilsFactory) {
-    var wavesurfer = Object.create(WaveSurfer);
-    var timeline;
-    var audioSrcUrl = '';
-    var currentAudioId;
-    var options;
-    var maxZoom = 50;
-    var minZoom = 13;
-
-    var progressDiv;
-    var progressBar;
-
-    var utils = UtilsFactory.getUtil();
-
+ 
     return {
-        initWaveSurfer: function() {
-            var options = {
-                container: document.querySelector('#waveform'),
-                waveColor: 'lightgrey',
-                progressColor: 'black',
-                loaderColor: 'purple',
-                cursorColor: 'navy',
-                markerWidth: 1,
-                minPxPerSec: minZoom
-            };
+        
+        moveForward: function(wsInstance) {
 
-            //wavesurfer.init(options);
-            //wavesurfer.load('media/demo_jpp.mp3');
+            // get markers
+            var markers = wsInstance.markers;
+            var currentTime = wsInstance.backend.getCurrentTime();
+            var end = wsInstance.backend.getDuration();
+            var delta = 0;
 
-            // Wavesurfer Progress bar
-            progressDiv = document.querySelector('#progress-bar');
-            progressBar = progressDiv.querySelector('.progress-bar');
-
-
-            wavesurfer.on('loading', function(percent, xhr) {
-                progressDiv.style.display = 'block';
-                progressBar.style.width = percent + '%';
-            });
-
-            // Won't work on iOS until you touch the page
-            wavesurfer.on('ready', function() {
-                progressDiv.style.display = 'none';
-                // init time-text with current time
-                $('#time').text(utils.secondsToHms(wavesurfer.backend.getCurrentTime()));
-                // TIMELINE
-                // avoid creating timeline object twice (after drag&drop for example)
-                if (timeline) {
-                    $('#wave-timeline wave').remove();
+            // if markers
+            if (this.countMarkers(markers) > 0) {
+                var nextMarker = this.getNextMarker(markers, currentTime, end);
+                if (nextMarker) {
+                    delta = nextMarker.position - wsInstance.backend.getCurrentTime();
                 }
                 else {
-                    // create timeline object
-                    timeline = Object.create(WaveSurfer.Timeline);
+                    delta = end - wsInstance.backend.getCurrentTime();
                 }
-
-                timeline.init({
-                    wavesurfer: wavesurfer,
-                    container: '#wave-timeline'
-                });
-
-                /*if (isEditing) {
-                 drawMarkerCollection(segments);
-                 }*/
-
-            });
-            // listen to progress event
-            wavesurfer.on('progress', function() {
-                $('#time').text(utils.secondsToHms(wavesurfer.backend.getCurrentTime()));
-            });
-            // hide wavesurfer progress bar
-            progressDiv.style.display = 'none';
-            $('#waveform wave').remove();
-            return wavesurfer;
+            }
+            else {
+                delta = end - wsInstance.backend.getCurrentTime();
+            }
+            wsInstance.skip(delta);
         },
-        showWaveForm: function(url) {
-            $('#waveform wave').remove();
-            wavesurfer.init(options);
-            $('#no-file').css('display', 'none');
-            wavesurfer.load(url);
+        moveBackward: function(wsInstance) {
+
+            // get markers
+            var markers = wsInstance.markers;
+            var currentTime = wsInstance.backend.getCurrentTime();
+            var delta = 0;
+            if (this.countMarkers(markers) > 0) {
+                var prevMarker = this.getPreviousMarker(markers, currentTime);
+                if (prevMarker) {
+                    delta = prevMarker.position - wsInstance.backend.getCurrentTime();
+                    wsInstance.skip(delta);
+                }
+                else{
+                    wsInstance.seekTo(0);
+                }
+            }
+            else {
+                wsInstance.seekTo(0);
+            }
         },
-        showBeginPanel: function() {
-            $('#waveform wave').remove();
-            $('#no-file').css('display', '');
-            progressDiv = document.querySelector('#progress-bar');
-            progressDiv.style.display = 'none';
-            console.log(wavesurfer.backend.getCurrentTime());
-            $('#time').text(utils.secondsToHms(wavesurfer.backend.getCurrentTime()));
+        countMarkers: function(markers) {
+            var nb = 0;
+            for (var marker in markers) {
+                nb++;
+            }
+            return nb;
+        },
+        getNextMarker: function(markers, currentTime, totalLength) {
+            // base marker position, we are searching for the nearest marker after this position
+            var sPosition = currentTime;
+            // nearest next marker result
+            var result = null;
+
+            // time diffenrence between current marker position and next one
+            var delta = totalLength - sPosition;
+
+            for (var marker in markers) {
+                // current marker position
+                var cPosition = markers[marker].position;
+                // is marker position greater than reference marker position ? (many markers can verify this condition)
+                if (cPosition > sPosition) {
+                    // get delta between cursor current position && marker position
+                    var tempDelta = cPosition - sPosition;
+                    // is it the nearest next marker ?
+                    if (tempDelta <= delta) {
+                        delta = tempDelta;
+                        result = markers[marker];
+                    }
+                }
+            }
+            return result;
+        },
+        getPreviousMarker: function(markers, currentTime) {
+            // base marker position, we are searching for the nearest marker after this position
+            var sPosition = currentTime;
+            // nearest next marker result
+            var result = null;
+
+            // time diffenrence between current marker position and next one
+            var delta = 0;
+
+            for (var marker in markers) {
+                // current marker position
+                var cPosition = markers[marker].position;
+                // previous marker ?
+                if (cPosition < sPosition) {
+                    // get delta between cursor current position && marker position (negative values)
+                    var tempDelta = cPosition - sPosition;
+                    // is it the nearest previous marker ?
+                    if (delta === 0 || tempDelta > delta) {
+                        delta = tempDelta;
+                        result = markers[marker];
+                    }
+                }
+            }
+            return result;
         }
     };
 }

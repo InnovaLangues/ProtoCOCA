@@ -4,6 +4,7 @@
 var CocaApp = angular.module('cocaApp', [
     'ngRoute',
     'ui.bootstrap',
+    'ui.bootstrap.progressbar',
     'WaveSurferDirective'
 ]);
 
@@ -16,11 +17,11 @@ CocaApp.config(['$routeProvider',
                 }).
                 when('/sceditor', {
                     templateUrl: 'js/app/coca/partials/sceditor.html',
-                    controller: 'SegmentsCreationCtrl'
+                    controller: 'SegmentsEditorCtrl'
                 }).
                 when('/pleditor', {
                     templateUrl: 'js/app/coca/partials/pleditor.html',
-                    controller: 'PlaylistCreationCtrl'
+                    controller: 'PlaylistEditorCtrl'
                 }).
                 otherwise({
                     redirectTo: '/weditor'
@@ -29,24 +30,25 @@ CocaApp.config(['$routeProvider',
 
 // main controller
 CocaApp.controller('MainCtrl', MainCtrl);
-CocaApp.factory('UtilsFactory', UtilsFactory);
 
 
 // controller for the creation of segments interface
-CocaApp.controller('SegmentsCreationCtrl', SegmentsCreationCtrl);
+CocaApp.controller('SegmentsEditorCtrl', SegmentsEditorCtrl);
 
 // controller for the audio editing interface
 CocaApp.controller('WaveEditorCtrl', WaveEditorCtrl);
 
 // controller for the playlist creation interface
-CocaApp.controller('PlaylistCreationCtrl', PlaylistCreationCtrl);
-
-// wavesurfer
-//CocaApp.controller('WaveSurferCtrl', WaveSurferCtrl);
-//CocaApp.factory('WaveSurferFactory', WaveSurferFactory);
+CocaApp.controller('PlaylistEditorCtrl', PlaylistEditorCtrl);
 
 // controller for upload file modal
 CocaApp.controller('UploadModalCtrl', UploadModalCtrl);
 
 // controller for xhr progress modal
 CocaApp.controller('ProgressModalCtrl', ProgressModalCtrl);
+
+// Factories
+CocaApp.factory('WaveSurferFactory', WaveSurferFactory);
+CocaApp.factory('UtilsFactory', UtilsFactory);
+CocaApp.factory('SegmentCollectionFactory', SegmentCollectionFactory);
+CocaApp.factory('SegmentFactory', SegmentFactory);

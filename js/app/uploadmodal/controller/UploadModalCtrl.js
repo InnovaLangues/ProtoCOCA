@@ -1,7 +1,7 @@
 'use strict';
 
 
-function UploadModalCtrl($scope, $modal, $modalInstance) {
+function UploadModalCtrl($scope, $modalInstance) {
     $scope.files = [];
 
     $scope.fileNameChanged = function(element) {        

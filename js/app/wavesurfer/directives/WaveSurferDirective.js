@@ -2,66 +2,49 @@
 
 angular.module('WaveSurferDirective', [])
         .value('myWaveSurferConfig', {})
-        .directive('myWaveSurfer', ['myWaveSurferConfig', 'UtilsFactory', function(myWaveSurferConfig, UtilsFactory) {
+        .directive('myWaveSurfer', ['myWaveSurferConfig', 'UtilsFactory', 'WaveSurferFactory', function(myWaveSurferConfig, UtilsFactory, WaveSurferFactory) {
 
                 var wavesurfer = Object.create(WaveSurfer);
-                var timeline;
-                var audioSrcUrl = '';
-                var audioId;
                 var maxZoom = 50;
                 var minZoom = 13;
-                var utils = UtilsFactory.getUtil();
-                var progressDiv;
-                var progressBar;
+                var timeline;
 
                 // Set some default options
                 var options = {
-                    container: '#waveform',
                     waveColor: 'lightgrey',
                     progressColor: 'black',
                     loaderColor: 'purple',
                     cursorColor: 'navy',
-                    markerWidth: 1,
+                    markerWidth: 2,
                     minPxPerSec: minZoom
                 };
 
                 myWaveSurferConfig = myWaveSurferConfig || {};
-                
-                //console.log(myWaveSurferConfig);
 
                 // Merge default config with user config
                 angular.extend(options, myWaveSurferConfig);
 
                 return {
-                    restrict: "A",
-                    scope:{
-                        url:'=url',
-                        fid:'=fid'
-                    },
+                    restrict: "AE",
+                    scope: {
+                        myFile:'=file',
+                        myWs:'@'
+                    }, // isolated scope
                     link: function($scope, el, attrs) {
+
+                        $scope.$emit('wsLoading');
+
                         var $container = document.querySelector('#waveform');
-                        
-                        // Reinject jQuery object into Picker config
+                        // Reinject jQuery object into wavesurfer config
                         options.container = $container;
 
                         // Wavesurfer Progress bar
-                        progressDiv = document.querySelector('#progress-bar');
-                        progressBar = progressDiv.querySelector('.progress-bar');
+                        var progressDiv = document.querySelector('#progress-bar');
+                        var progressBar = progressDiv.querySelector('.progress-bar');
 
                         wavesurfer.init(options);
-       
-                        //console.log($scope.url + ' ' + $scope.fid);
-                        
-                       /* var test = $scope.$eval(attrs.myWaveSurfer);
-                         console.log(test);*/
-                 
-                        audioSrcUrl = $scope.url;
-                        audioId = $scope.fid;
-                        
-                        wavesurfer.load(audioSrcUrl);
-                        
-                        //console.log(utils);
-                        
+                        wavesurfer.load($scope.myFile.url);
+
                         wavesurfer.on('loading', function(percent, xhr) {
                             progressDiv.style.display = 'block';
                             progressBar.style.width = percent + '%';
@@ -70,10 +53,9 @@ angular.module('WaveSurferDirective', [])
                         // Won't work on iOS until you touch the page
                         wavesurfer.on('ready', function() {
                             progressDiv.style.display = 'none';
-                            // init time-text with current time
-                            $('#time').text(utils.secondsToHms(wavesurfer.backend.getCurrentTime()));
+
                             // TIMELINE
-                            // avoid creating timeline object twice (after drag&drop for example)
+                            // avoid creating timeline object twice (after uploading a new file for example)
                             if (timeline) {
                                 $('#wave-timeline wave').remove();
                             }
@@ -86,15 +68,69 @@ angular.module('WaveSurferDirective', [])
                                 wavesurfer: wavesurfer,
                                 container: '#wave-timeline'
                             });
+                            
+                            $scope.$apply(function() {
+                                $scope.time = UtilsFactory.secondsToHms(wavesurfer.backend.getCurrentTime());
+                            });
+
+                            // HERE :: STRANGE BEHAVIOR emit is called twice but only when i upload a second file
+                            /*if($scope.$parent){
+                                $scope.$parent.wsInstance = wavesurfer;
+                                console.log('parent');
+                            }
+                            else{
+                                $scope.wsInstance = wavesurfer;
+                                console.log('directive');
+                            }*/
+                            
+                            $scope.$emit('wsLoaded', wavesurfer);
                         });
                         // listen to progress event
                         wavesurfer.on('progress', function() {
-                            $('#time').text(utils.secondsToHms(wavesurfer.backend.getCurrentTime()));
+                            $scope.time = UtilsFactory.secondsToHms(wavesurfer.backend.getCurrentTime());
                         });
                         // hide wavesurfer progress bar
                         progressDiv.style.display = 'none';
                     },
-                    templateUrl: 'js/app/wavesurfer/partials/wave.html'
+                    templateUrl: 'js/app/wavesurfer/partials/wave.html',
+                    controller: ['$scope', function($scope) {
+                            $scope.play = function() {
+                                wavesurfer.playPause();
+                            };
+                            // go to previous marker
+                            $scope.back = function() {
+                                //moveBackward();
+                                WaveSurferFactory.moveBackward(wavesurfer);
+                            };
+                            // go to next marker
+                            $scope.forth = function() {
+                                //moveForward();
+                                WaveSurferFactory.moveForward(wavesurfer);
+                            };
+                            $scope.zoomIn = function() {
+                                if (wavesurfer.minPxPerSec < maxZoom) {
+                                    wavesurfer.params.scrollParent = true;
+                                    wavesurfer.minPxPerSec += 1;
+                                    wavesurfer.params.minPxPerSec += 1;
+                                    wavesurfer.drawBuffer();
+                                }
+                            };
+                            $scope.zoomOut = function() {
+                                if (wavesurfer.minPxPerSec > minZoom) {
+                                    wavesurfer.params.scrollParent = true;
+                                    wavesurfer.params.minPxPerSec -= 1;
+                                    wavesurfer.minPxPerSec -= 1;
+                                    wavesurfer.params.minPxPerSec -= 1;
+                                    wavesurfer.drawBuffer();
+                                }
+                            };
+                            $scope.changeSpeed = function(e) {
+                                var value = e.target.dataset && e.target.dataset.value;
+                                wavesurfer.playPause();
+                                wavesurfer.backend.setPlaybackRate(value);
+                                wavesurfer.playPause();
+                            };
+                        }]
                 };
             }]);
 

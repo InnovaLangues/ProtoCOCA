@@ -1,20 +1,16 @@
 'use strict';
-
 /**
  * WaveSurferFactory
  */
-function WaveSurferFactory(UtilsFactory) {
- 
-    return {
-        
-        moveForward: function(wsInstance) {
+function WaveSurferFactory() {
 
+    return {
+        moveForward: function(wsInstance) {
             // get markers
             var markers = wsInstance.markers;
             var currentTime = wsInstance.backend.getCurrentTime();
             var end = wsInstance.backend.getDuration();
             var delta = 0;
-
             // if markers
             if (this.countMarkers(markers) > 0) {
                 var nextMarker = this.getNextMarker(markers, currentTime, end);
@@ -31,7 +27,6 @@ function WaveSurferFactory(UtilsFactory) {
             wsInstance.skip(delta);
         },
         moveBackward: function(wsInstance) {
-
             // get markers
             var markers = wsInstance.markers;
             var currentTime = wsInstance.backend.getCurrentTime();
@@ -42,7 +37,7 @@ function WaveSurferFactory(UtilsFactory) {
                     delta = prevMarker.position - wsInstance.backend.getCurrentTime();
                     wsInstance.skip(delta);
                 }
-                else{
+                else {
                     wsInstance.seekTo(0);
                 }
             }
@@ -62,10 +57,8 @@ function WaveSurferFactory(UtilsFactory) {
             var sPosition = currentTime;
             // nearest next marker result
             var result = null;
-
             // time diffenrence between current marker position and next one
             var delta = totalLength - sPosition;
-
             for (var marker in markers) {
                 // current marker position
                 var cPosition = markers[marker].position;
@@ -87,10 +80,8 @@ function WaveSurferFactory(UtilsFactory) {
             var sPosition = currentTime;
             // nearest next marker result
             var result = null;
-
             // time diffenrence between current marker position and next one
             var delta = 0;
-
             for (var marker in markers) {
                 // current marker position
                 var cPosition = markers[marker].position;
@@ -106,6 +97,40 @@ function WaveSurferFactory(UtilsFactory) {
                 }
             }
             return result;
+        },
+        isFirstOrLastMarker: function(current, duration) {
+            return current === 0 || current === duration;
+        },
+        checkMarkerNewPosition: function(cMarker, newPosition, markers, length) {
+            var nextMarker = this.getNextMarker(markers, cMarker.position, length);
+            var prevMarker = this.getPreviousMarker(markers, cMarker.position);
+            return newPosition > prevMarker.position && newPosition < nextMarker.position;
+        },
+        checkNewMarkerPosition: function(markers, position) {
+            for (var marker in markers) {
+                if (position === markers[marker].position) {
+                    return false;
+                }
+            }
+            return true;
+        },
+        updateMarker: function(wavesurfer, time, mId) {
+
+            wavesurfer.markers[mId].update({
+                id: mId,
+                position: time
+            });
+            wavesurfer.redrawMarks();
+        },
+        getSortedMarkersArray: function(markers) {
+            var sortable = [];
+            for (var id in markers) {
+                sortable.push(markers[id]);
+            }
+            sortable.sort(function(a, b) {
+                return a.position - b.position;
+            });
+            return sortable;
         }
     };
 }

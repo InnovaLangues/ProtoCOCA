@@ -468,7 +468,7 @@ document.addEventListener('DOMContentLoaded', function() {
             var content = '';
             content += '<div class="row">';
             content += '    <div class="col-md-12">';
-            content += '        <table id="pjct-table" class="table table-striped"k>';
+            content += '        <table id="pjct-table" class="table table-striped">';
 
             if (sCList.length > 0) {
                 for (var i = 0; i < sCList.length; i++) {

@@ -1,8 +1,5 @@
 'use strict';
 function UtilsFactory($modal) {
-
-
-
     return {
         /**
          * Create a unique UUID
@@ -19,7 +16,6 @@ function UtilsFactory($modal) {
         secondsToHms: function(d) {
             d = Number(d);
             if (d > 0) {
-
                 var hours = Math.floor(d / 3600);
                 var minutes = Math.floor(d % 3600 / 60);
                 var seconds = Math.floor(d % 3600 % 60);

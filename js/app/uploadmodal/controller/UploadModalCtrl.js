@@ -4,8 +4,7 @@
 function UploadModalCtrl($scope, $modalInstance) {
     $scope.files = [];
 
-    $scope.fileNameChanged = function(element) {        
-
+    $scope.fileNameChanged = function(element) { 
         $scope.$apply(function() {
             $scope.files = element.files;
         });

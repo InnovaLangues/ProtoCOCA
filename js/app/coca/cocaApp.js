@@ -28,6 +28,47 @@ CocaApp.config(['$routeProvider',
                 });
     }]);
 
+// FILTERS
+
+CocaApp.filter('split', function() {
+    return function(input, splitChar, splitIndex) {
+        // do some bounds checking here to ensure it has that index
+        return input.split(splitChar)[splitIndex];
+    };
+});
+
+CocaApp.filter('flToHHmmss', function() {
+    return function(value) {        
+         value = Number(value);
+            if (value > 0) {
+                var hours = Math.floor(value / 3600);
+                var minutes = Math.floor(value % 3600 / 60);
+                var seconds = Math.floor(value % 3600 % 60);
+                // ms
+                var str = value.toString();
+                var substr = str.split('.');
+                var ms = substr[1].substring(0, 2);
+                if (hours < 10) {
+                    hours = "0" + hours;
+                }
+                if (minutes < 10) {
+                    minutes = "0" + minutes;
+                }
+                if (seconds < 10) {
+                    seconds = "0" + seconds;
+                }
+                var time = hours + ':' + minutes + ':' + seconds + ':' + ms;
+                return time;
+            }
+            else {
+
+                return "00:00:00:00";
+            }
+    };
+});
+
+// CONTROLLERS
+
 // main controller
 CocaApp.controller('MainCtrl', MainCtrl);
 
@@ -47,7 +88,12 @@ CocaApp.controller('UploadModalCtrl', UploadModalCtrl);
 // controller for xhr progress modal
 CocaApp.controller('ProgressModalCtrl', ProgressModalCtrl);
 
-// Factories
+CocaApp.controller('SegmentsCollectionsModalCtrl', SegmentsCollectionsModalCtrl);
+
+CocaApp.controller('SaveCollectionCtrl', SaveCollectionCtrl);
+
+// FACTORIES
+
 CocaApp.factory('WaveSurferFactory', WaveSurferFactory);
 CocaApp.factory('UtilsFactory', UtilsFactory);
 CocaApp.factory('SegmentCollectionFactory', SegmentCollectionFactory);

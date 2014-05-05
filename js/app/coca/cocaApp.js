@@ -8,6 +8,7 @@ var CocaApp = angular.module('cocaApp', [
     'WaveSurferDirective'
 ]);
 
+// for now only sceditor is shown and usable
 CocaApp.config(['$routeProvider',
     function($routeProvider) {
         $routeProvider.
@@ -24,7 +25,7 @@ CocaApp.config(['$routeProvider',
                     controller: 'PlaylistEditorCtrl'
                 }).
                 otherwise({
-                    redirectTo: '/weditor'
+                    redirectTo: '/sceditor'
                 });
     }]);
 

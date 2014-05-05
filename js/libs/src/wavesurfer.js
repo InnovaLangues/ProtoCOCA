@@ -20,8 +20,7 @@ var WaveSurfer = {
         container     : null,
         renderer      : 'Canvas',
         dragSelection : true,
-        loopSelection : true,
-        audioRate     : 1
+        loopSelection : true
     },
 
     init: function (params) {
@@ -265,6 +264,7 @@ var WaveSurfer = {
                 this.getDuration() * this.minPxPerSec
             );
         }
+
         this.drawer.drawPeaks(this.backend.getPeaks(length), length);
         this.drawer.progress(this.backend.getPlayedPercents());
         this.redrawMarks();

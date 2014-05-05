@@ -3,8 +3,9 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
     function(myWaveSurferConfig, UtilsFactory, WaveSurferFactory) {
         //console.log('dir called');
         //var wavesurfer = Object.create(WaveSurfer);
-        var maxZoom = 50;
+        var maxZoom = 100;
         var minZoom = 13;
+        var zoomGap = 1;
         var timeline;
         // Set some default options
         var options = {
@@ -15,6 +16,12 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
             markerWidth: 2,
             minPxPerSec: minZoom
         };
+
+        /*if (location.search.match('scroll')) {
+            options.minPxPerSec = 100;
+            options.scrollParent = true;
+        }*/
+
         myWaveSurferConfig = myWaveSurferConfig || {};
         // Merge default config with user config
         angular.extend(options, myWaveSurferConfig);
@@ -80,30 +87,37 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
                     };
                     // go to previous marker
                     $scope.back = function() {
-                        //moveBackward();
                         WaveSurferFactory.moveBackward($scope.waveSurfer);
                     };
                     // go to next marker
                     $scope.forth = function() {
-                        //moveForward();
                         WaveSurferFactory.moveForward($scope.waveSurfer);
                     };
                     $scope.zoomIn = function() {
+                        console.log($scope.waveSurfer.backend.getCurrentTime());
                         if ($scope.waveSurfer.minPxPerSec < maxZoom) {
                             $scope.waveSurfer.params.scrollParent = true;
-                            $scope.waveSurfer.minPxPerSec += 1;
-                            $scope.waveSurfer.params.minPxPerSec += 1;
+                            $scope.waveSurfer.params.minPxPerSec += zoomGap;
+                            $scope.waveSurfer.minPxPerSec += zoomGap;                            
                             $scope.waveSurfer.drawBuffer();
                         }
+                        console.log($scope.waveSurfer.backend.getCurrentTime());
                     };
                     $scope.zoomOut = function() {
+                        console.log($scope.waveSurfer.backend.getCurrentTime());
                         if ($scope.waveSurfer.minPxPerSec > minZoom) {
                             $scope.waveSurfer.params.scrollParent = true;
-                            $scope.waveSurfer.params.minPxPerSec -= 1;
-                            $scope.waveSurfer.minPxPerSec -= 1;
-                            $scope.waveSurfer.params.minPxPerSec -= 1;
+                            $scope.waveSurfer.params.minPxPerSec -= zoomGap;
+                            $scope.waveSurfer.minPxPerSec -= zoomGap;
                             $scope.waveSurfer.drawBuffer();
                         }
+                        else{
+                            $scope.waveSurfer.params.scrollParent = false;
+                            $scope.waveSurfer.params.minPxPerSec = minZoom;
+                            $scope.waveSurfer.minPxPerSec = minZoom;
+                            $scope.waveSurfer.drawBuffer();
+                        }   
+                        console.log($scope.waveSurfer.backend.getCurrentTime());                         
                     };
                     $scope.changeSpeed = function(e) {
                         var value = e.target.dataset && e.target.dataset.value;

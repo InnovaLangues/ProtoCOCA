@@ -31,6 +31,7 @@ function SegmentsEditorCtrl($scope, $modal, $filter, UtilsFactory, WaveSurferFac
             $scope.wsInstance.clearMarks();
         });
 
+        // are we editing an existing project or not
         if ($scope.isEditing) {
             $scope.drawSegments($scope.currentProject.segments);
         }

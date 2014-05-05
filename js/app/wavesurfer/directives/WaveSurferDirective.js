@@ -94,17 +94,14 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
                         WaveSurferFactory.moveForward($scope.waveSurfer);
                     };
                     $scope.zoomIn = function() {
-                        console.log($scope.waveSurfer.backend.getCurrentTime());
                         if ($scope.waveSurfer.minPxPerSec < maxZoom) {
                             $scope.waveSurfer.params.scrollParent = true;
                             $scope.waveSurfer.params.minPxPerSec += zoomGap;
                             $scope.waveSurfer.minPxPerSec += zoomGap;                            
                             $scope.waveSurfer.drawBuffer();
                         }
-                        console.log($scope.waveSurfer.backend.getCurrentTime());
                     };
                     $scope.zoomOut = function() {
-                        console.log($scope.waveSurfer.backend.getCurrentTime());
                         if ($scope.waveSurfer.minPxPerSec > minZoom) {
                             $scope.waveSurfer.params.scrollParent = true;
                             $scope.waveSurfer.params.minPxPerSec -= zoomGap;
@@ -116,8 +113,7 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
                             $scope.waveSurfer.params.minPxPerSec = minZoom;
                             $scope.waveSurfer.minPxPerSec = minZoom;
                             $scope.waveSurfer.drawBuffer();
-                        }   
-                        console.log($scope.waveSurfer.backend.getCurrentTime());                         
+                        }                          
                     };
                     $scope.changeSpeed = function(e) {
                         var value = e.target.dataset && e.target.dataset.value;

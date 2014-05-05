@@ -47,7 +47,7 @@ function UtilsFactory($modal) {
                 if (request.readyState === 4 && request.status === 200) {
                     var response = JSON.parse(request.responseText);
                     callback(response);
-                    $('.progress-bar').css('width', '0%');
+                    //$('.progress-bar').css('width', '0%');
                     pmodal.close();
                 }
             };
@@ -66,7 +66,7 @@ function UtilsFactory($modal) {
             };
             request.open('POST', url);
             request.send(data);
-        },
+        }/*,
         xhr2: function(url, data, callback) {
             var request = new XMLHttpRequest();
             var progress = '';
@@ -106,7 +106,7 @@ function UtilsFactory($modal) {
             };
             request.open('POST', url);
             request.send(data);
-        }
+        }*/
     };
 
 }

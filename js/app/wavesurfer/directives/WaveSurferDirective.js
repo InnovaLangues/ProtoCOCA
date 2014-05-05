@@ -15,12 +15,7 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
             cursorColor: 'navy',
             markerWidth: 2,
             minPxPerSec: minZoom
-        };
-
-        /*if (location.search.match('scroll')) {
-            options.minPxPerSec = 100;
-            options.scrollParent = true;
-        }*/
+        };      
 
         myWaveSurferConfig = myWaveSurferConfig || {};
         // Merge default config with user config

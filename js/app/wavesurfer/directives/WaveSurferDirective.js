@@ -14,7 +14,11 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
             loaderColor: 'purple',
             cursorColor: 'navy',
             markerWidth: 2,
-            minPxPerSec: minZoom
+            minPxPerSec: minZoom,
+            selectionColor: 'rgba(255,0,0, .2)',
+            selectionForeground: true,
+            selectionBorder: true,
+            selectionBorderColor: '#d42929'
         };      
 
         myWaveSurferConfig = myWaveSurferConfig || {};

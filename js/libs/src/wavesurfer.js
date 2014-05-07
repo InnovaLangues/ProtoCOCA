@@ -7,10 +7,14 @@ var WaveSurfer = {
         progressColor : '#555',
         cursorColor   : '#333',
         selectionColor: '#0fc',
+        selectionForeground: false,
+        selectionBorder: false,
+        selectionBorderColor: '#000',
+        handlerSize   : 15,
         cursorWidth   : 1,
-        markerWidth   : 1,
+        markerWidth   : 2,
         skipLength    : 2,
-        minPxPerSec   : 1,
+        minPxPerSec   : 10,
         samples       : 3,
         pixelRatio    : window.devicePixelRatio,
         fillParent    : true,
@@ -20,12 +24,22 @@ var WaveSurfer = {
         container     : null,
         renderer      : 'Canvas',
         dragSelection : true,
-        loopSelection : true
+        loopSelection : true,
+        audioRate     : 1,
+        interact      : true
     },
 
     init: function (params) {
         // Extract relevant parameters (or defaults)
         this.params = WaveSurfer.util.extend({}, this.defaultParams, params);
+
+        this.container = 'string' == typeof params.container ?
+            document.querySelector(this.params.container) :
+            this.params.container;
+
+        if (!this.container) {
+            throw new Error('wavesurfer.js: container element not found');
+        }
 
         // Marker objects
         this.markers = {};
@@ -40,20 +54,58 @@ var WaveSurfer = {
         this.loopSelection = this.params.loopSelection;
         this.minPxPerSec = this.params.minPxPerSec;
 
-        this.createBackend();
+        this.bindUserAction();
         this.createDrawer();
+        this.createBackend();
+    },
 
-        this.on('loaded', this.loadBuffer.bind(this));
+    bindUserAction: function () {
+        // iOS requires user input to start loading audio
+        var my = this;
+        var onUserAction = function () {
+            my.fireEvent('user-action');
+        };
+        document.addEventListener('mousedown', onUserAction);
+        document.addEventListener('keydown', onUserAction);
+        this.on('destroy', function () {
+            document.removeEventListener('mousedown', onUserAction);
+            document.removeEventListener('keydown', onUserAction);
+        });
+    },
+
+    /**
+     * Used with loadStream.
+     */
+    createMedia: function (url) {
+        var my = this;
+
+        var media = document.createElement('audio');
+        media.controls = false;
+        media.autoplay = false;
+        media.src = url;
+
+        media.addEventListener('error', function () {
+            my.fireEvent('error', 'Error loading media element');
+        });
+
+        var prevMedia = this.container.querySelector('audio');
+        if (prevMedia) {
+            this.container.removeChild(prevMedia);
+        }
+        this.container.appendChild(media);
+
+        return media;
     },
 
     createDrawer: function () {
         var my = this;
 
         this.drawer = Object.create(WaveSurfer.Drawer[this.params.renderer]);
-        this.drawer.init(this.params);
+        this.drawer.init(this.container, this.params);
 
         this.drawer.on('redraw', function () {
             my.drawBuffer();
+            my.drawer.progress(my.backend.getPlayedPercents());
         });
 
         this.on('progress', function (progress) {
@@ -62,22 +114,28 @@ var WaveSurfer = {
 
         // Click-to-seek
         this.drawer.on('mousedown', function (progress) {
-            my.seekTo(progress);
+            setTimeout(function () {
+                my.seekTo(progress);
+            }, 0);
         });
 
         // Drag selection events
         if (this.params.dragSelection) {
             this.drawer.on('drag', function (drag) {
-                if (my.selMark0 && my.selMark0.percentage != drag.startPercentage) {
-                    my.seekTo(drag.startPercentage);
-                }
-
                 my.updateSelection(drag);
             });
             this.drawer.on('drag-clear', function () {
                 my.clearSelection();
             });
+            this.drawer.on('drag-mark', function (drag, mark) {
+                my.updateSelectionByMark(drag, mark);
+            });
         }
+
+        // Mouseup for plugins
+        this.drawer.on('mouseup', function (e) {
+            my.fireEvent('mouseup', e);
+        });
     },
 
     createBackend: function () {
@@ -105,8 +163,8 @@ var WaveSurfer = {
         var requestFrame = window.requestAnimationFrame ||
             window.webkitRequestAnimationFrame;
         var frame = function () {
-            my.fireEvent('progress', my.backend.getPlayedPercents());
             if (!my.backend.isPaused()) {
+                my.fireEvent('progress', my.backend.getPlayedPercents());
                 requestFrame(frame);
             }
         };
@@ -121,12 +179,8 @@ var WaveSurfer = {
         return this.backend.getCurrentTime();
     },
 
-    playAt: function (percents) {
-        this.backend.play(this.getDuration() * percents);
-    },
-
-    play: function () {
-        this.backend.play();
+    play: function (start, end) {
+        this.backend.play(start, end);
     },
 
     pause: function () {
@@ -137,6 +191,13 @@ var WaveSurfer = {
         this.backend.isPaused() ? this.play() : this.pause();
     },
 
+    playPauseSelection: function(){
+        var sel = this.getSelection();
+        if (sel !== null){
+            this.seekTo(sel.startPercentage);
+            this.playPause();
+        }
+    },
     skipBackward: function (seconds) {
         this.skip(seconds || -this.params.skipLength);
     },
@@ -154,16 +215,22 @@ var WaveSurfer = {
 
     seekTo: function (progress) {
         var paused = this.backend.isPaused();
-        this.playAt(progress);
+        // avoid small scrolls while paused seeking
+        var oldScrollParent = this.params.scrollParent;
+        if (paused) {
+            this.params.scrollParent = false;
+        }
+        this.play(progress * this.getDuration());
         if (paused) {
             this.pause();
         }
+        this.params.scrollParent = oldScrollParent;
         this.fireEvent('seek', progress);
     },
 
     stop: function () {
-        this.playAt(0);
         this.pause();
+        this.seekTo(0);
         this.drawer.progress(0);
     },
 
@@ -199,47 +266,62 @@ var WaveSurfer = {
     },
 
     mark: function (options) {
-        if (options.id && options.id in this.markers) {
-            return this.markers[options.id].update(options);
-        }
-
         var my = this;
 
         var opts = WaveSurfer.util.extend({
             id: WaveSurfer.util.getId(),
-            position: this.getCurrentTime(),
             width: this.params.markerWidth
         }, options);
 
-        var marker = Object.create(WaveSurfer.Mark);
+        if (opts.percentage && !opts.position) {
+            opts.position = opts.percentage * this.getDuration();
+        }
+        opts.percentage = opts.position / this.getDuration();
 
-        marker.on('update', function () {
-            var duration = my.getDuration() || 1;
-            if (null == marker.position) {
-                marker.position = marker.percentage * duration;
-            }
-            // validate percentage
-            marker.percentage = marker.position / duration;
-            my.markers[marker.id] = marker;
+        // If exists, just update and exit early
+        if (opts.id in this.markers) {
+            return this.markers[opts.id].update(opts);
+        }
 
-            // redraw marker
-            my.drawer.addMark(marker);
+        // Ensure position for a new marker
+        if (!opts.position) {
+            opts.position = this.getCurrentTime();
+            opts.percentage = opts.position / this.getDuration();
+        }
+
+        var mark = Object.create(WaveSurfer.Mark);
+        mark.init(opts);
+        mark.on('update', function () {
+            my.drawer.updateMark(mark);
+        });
+        mark.on('remove', function () {
+            my.drawer.removeMark(mark);
+            delete my.markers[mark.id];
         });
 
-        marker.on('remove', function () {
-            my.drawer.removeMark(marker);
-            delete my.markers[marker.id];
+        this.drawer.addMark(mark);
+        this.drawer.on('mark-over', function (mark, e) {
+            mark.fireEvent('over', e);
+            my.fireEvent('mark-over', mark, e);
+        });
+        this.drawer.on('mark-leave', function (mark, e) {
+            mark.fireEvent('leave', e);
+            my.fireEvent('mark-leave', mark, e);
+        });
+        this.drawer.on('mark-click', function (mark, e) {
+            mark.fireEvent('click', e);
+            my.fireEvent('mark-click', mark, e);
         });
 
-        this.fireEvent('marked', marker);
+        this.markers[mark.id] = mark;
+        this.fireEvent('marked', mark);
 
-        return marker.init(opts);
+        return mark;
     },
 
     redrawMarks: function () {
         Object.keys(this.markers).forEach(function (id) {
-            var marker = this.markers[id];
-            this.drawer.addMark(marker);
+            this.mark(this.markers[id]);
         }, this);
     },
 
@@ -247,6 +329,7 @@ var WaveSurfer = {
         Object.keys(this.markers).forEach(function (id) {
             this.markers[id].remove();
         }, this);
+        this.markers = {};
     },
 
     timings: function (offset) {
@@ -261,35 +344,128 @@ var WaveSurfer = {
             var length = this.drawer.getWidth();
         } else {
             length = Math.round(
-                this.getDuration() * this.minPxPerSec
+                this.getDuration() * this.minPxPerSec * this.params.pixelRatio
             );
         }
 
         this.drawer.drawPeaks(this.backend.getPeaks(length), length);
-        this.drawer.progress(this.backend.getPlayedPercents());
         this.redrawMarks();
         this.fireEvent('redraw');
     },
 
-    loadBuffer: function (data) {
+    drawAsItPlays: function () {
         var my = this;
-        this.backend.loadBuffer(data, function () {
-            my.clearMarks();
-            my.drawBuffer();
-            my.fireEvent('ready');
-        }, function () {
-            my.fireEvent('error', 'Error decoding audio');
+        var peaks;
+        var prevX = -1;
+        this.on('progress', function () {
+            var length = Math.round(
+                my.getDuration() * my.minPxPerSec * my.params.pixelRatio
+            );
+
+            if (!peaks) {
+                peaks = new Uint8Array(length);
+            }
+
+            var x = ~~(my.backend.getPlayedPercents() * length);
+            if (x != prevX) {
+                prevX = x;
+                peaks[x] = WaveSurfer.util.max(my.backend.waveform(), 128);
+            }
+
+            my.drawer.setWidth(length);
+            my.drawer.clearWave();
+            my.drawer.drawWave(peaks, 128);
         });
     },
 
     /**
-     * Loads an AudioBuffer.
+     * Internal method.
+     */
+    loadArrayBuffer: function (arraybuffer) {
+        var my = this;
+        this.backend.decodeArrayBuffer(arraybuffer, function (data) {
+            my.backend.loadBuffer(data);
+            my.drawBuffer();
+            my.fireEvent('ready');
+        }, function () {
+            my.fireEvent('error', 'Error decoding audiobuffer');
+        });
+    },
+
+    /**
+     * Directly load an externally decoded AudioBuffer.
      */
     loadDecodedBuffer: function (buffer) {
-      this.backend.setBuffer(buffer);
-      this.clearMarks();
-      this.drawBuffer();
-      this.fireEvent('ready');
+        this.empty();
+        this.backend.loadBuffer(buffer);
+        this.drawBuffer();
+        this.fireEvent('ready');
+    },
+
+    /**
+     * Loads audio data from a Blob or File object.
+     *
+     * @param {Blob|File} blob Audio data.
+     */
+    loadBlob: function (blob) {
+        var my = this;
+        // Create file reader
+        var reader = new FileReader();
+        reader.addEventListener('progress', function (e) {
+            my.onProgress(e);
+        });
+        reader.addEventListener('load', function (e) {
+            my.empty();
+            my.loadArrayBuffer(e.target.result);
+        });
+        reader.addEventListener('error', function () {
+            my.fireEvent('error', 'Error reading file');
+        });
+        reader.readAsArrayBuffer(blob);
+    },
+
+    /**
+     * Loads audio and prerenders its waveform.
+     */
+    load: function (url) {
+        this.empty();
+        // load via XHR and render all at once
+        return this.downloadArrayBuffer(url, this.loadArrayBuffer.bind(this));
+    },
+
+    /**
+     * Load audio stream and render its waveform as it plays.
+     */
+    loadStream: function (url) {
+        var my = this;
+
+        this.empty();
+        this.drawAsItPlays();
+        this.media = this.createMedia(url);
+
+        // iOS requires a touch to start loading audio
+        this.once('user-action', function () {
+            // Assume media.readyState >= media.HAVE_ENOUGH_DATA
+            my.backend.loadMedia(my.media);
+        });
+
+        setTimeout(this.fireEvent.bind(this, 'ready'), 0);
+    },
+
+    downloadArrayBuffer: function (url, callback) {
+        var my = this;
+        var ajax = WaveSurfer.util.ajax({
+            url: url,
+            responseType: 'arraybuffer'
+        });
+        ajax.on('progress', function (e) {
+            my.onProgress(e);
+        });
+        ajax.on('success', callback);
+        ajax.on('error', function (e) {
+            my.fireEvent('error', 'XHR error: ' + e.target.statusText);
+        });
+        return ajax;
     },
 
     onProgress: function (e) {
@@ -301,103 +477,6 @@ var WaveSurfer = {
             percentComplete = e.loaded / (e.loaded + 1000000);
         }
         this.fireEvent('loading', Math.round(percentComplete * 100), e.target);
-    },
-
-    /**
-     * Loads audio data from a Blob or File object.
-     *
-     * @param {Blob|File} blob Audio data.
-     */
-    loadArrayBuffer: function(blob) {
-        var my = this;
-        // Create file reader
-        var reader = new FileReader();
-        reader.addEventListener('progress', function (e) {
-            my.onProgress(e);
-        });
-        reader.addEventListener('load', function (e) {
-            my.fireEvent('loaded', e.target.result);
-        });
-        reader.addEventListener('error', function () {
-            my.fireEvent('error', 'Error reading file');
-        });
-        reader.readAsArrayBuffer(blob);
-    },
-
-    /**
-     * Loads an audio file via XHR.
-     */
-    load: function (url) {
-        var my = this;
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', url, true);
-        xhr.send();
-        xhr.responseType = 'arraybuffer';
-        xhr.addEventListener('progress', function (e) {
-            my.onProgress(e);
-        });
-        xhr.addEventListener('load', function () {
-            if (200 == xhr.status) {
-                my.fireEvent('loaded', xhr.response);
-            } else {
-                my.fireEvent('error', 'Server response: ' + xhr.statusText);
-            }
-        });
-        xhr.addEventListener('error', function () {
-            my.fireEvent('error', 'Error loading audio');
-        });
-        this.empty();
-    },
-
-    /**
-     * Listens to drag'n'drop.
-     * @param {HTMLElement|String} dropTarget Element or selector.
-     */
-    bindDragNDrop: function (dropTarget) {
-        var my = this;
-
-        // Bind drop event
-        if (typeof dropTarget == 'string') {
-            dropTarget = document.querySelector(dropTarget);
-        }
-
-        var dropActiveCl = 'wavesurfer-dragover';
-        var handlers = {};
-
-        // Drop event
-        handlers.drop = function (e) {
-            e.stopPropagation();
-            e.preventDefault();
-            dropTarget.classList.remove(dropActiveCl);
-            var file = e.dataTransfer.files[0];
-            if (file) {
-                my.empty();
-                my.loadArrayBuffer(file);
-            } else {
-                my.fireEvent('error', 'Not a file');
-            }
-        };
-        // Dragover & dragleave events
-        handlers.dragover = function (e) {
-            e.stopPropagation();
-            e.preventDefault();
-            dropTarget.classList.add(dropActiveCl);
-        };
-        handlers.dragleave = function (e) {
-            e.stopPropagation();
-            e.preventDefault();
-            dropTarget.classList.remove(dropActiveCl);
-        };
-
-        Object.keys(handlers).forEach(function (event) {
-            dropTarget.addEventListener(event, handlers[event]);
-        });
-
-        this.on('destroy', function () {
-            Object.keys(handlers).forEach(function (event) {
-                dropTarget.removeEventListener(event, handlers[event]);
-            });
-        });
     },
 
     bindMarks: function () {
@@ -414,7 +493,7 @@ var WaveSurfer = {
         this.backend.on('audioprocess', function (time) {
             Object.keys(my.markers).forEach(function (id) {
                 var marker = my.markers[id];
-                if (!marker.played || (my.loopSelection && marker.loopEnd)) {
+                if (!marker.played) {
                     if (marker.position <= time && marker.position >= prevTime) {
                         // Prevent firing the event more than once per playback
                         marker.played = true;
@@ -432,8 +511,12 @@ var WaveSurfer = {
      * Display empty waveform.
      */
     empty: function () {
+        if (this.backend && !this.backend.isPaused()) {
+            this.stop();
+            this.backend.disconnectSource();
+        }
         this.clearMarks();
-        this.backend.loadEmpty();
+        this.drawer.setWidth(0);
         this.drawer.drawPeaks({ length: this.drawer.getWidth() }, 0);
     },
 
@@ -446,14 +529,37 @@ var WaveSurfer = {
         this.unAll();
         this.backend.destroy();
         this.drawer.destroy();
+        if (this.media) {
+            this.container.removeChild(this.media);
+        }
+    },
+
+    updateSelectionByMark: function (markDrag, mark) {
+        var selection;
+        if (mark.id == this.selMark0.id){
+            selection = {
+                'startPercentage': markDrag.endPercentage,
+                'endPercentage': this.selMark1.percentage
+            };
+        } else {
+            selection = {
+                'startPercentage': this.selMark0.percentage,
+                'endPercentage': markDrag.endPercentage
+            };
+        }
+        this.updateSelection(selection);
     },
 
     updateSelection: function (selection) {
         var my = this;
-
         var percent0 = selection.startPercentage;
         var percent1 = selection.endPercentage;
         var color = this.params.selectionColor;
+        var width = 0;
+        if (this.params.selectionBorder) {
+            color = this.params.selectionBorderColor;
+            width = 2; // parametrize?
+        }
 
         if (percent0 > percent1) {
             var tmpPercent = percent0;
@@ -462,36 +568,43 @@ var WaveSurfer = {
         }
 
         if (this.selMark0) {
-            this.selMark0.update({ percentage: percent0 });
+            this.selMark0.update({
+                percentage: percent0,
+                position: percent0 * this.getDuration()
+            });
         } else {
             this.selMark0 = this.mark({
-                id: 'selMark0',
+                width: width,
                 percentage: percent0,
+                position: percent0 * this.getDuration(),
                 color: color
             });
         }
-        this.drawer.addMark(this.selMark0);
 
         if (this.selMark1) {
-            this.selMark1.update({ percentage: percent1 });
+            this.selMark1.update({
+                percentage: percent1,
+                position: percent1 * this.getDuration()
+            });
         } else {
             this.selMark1 = this.mark({
-                id: 'selMark1',
+                width: width,
                 percentage: percent1,
+                position: percent1 * this.getDuration(),
                 color: color
             });
-            this.selMark1.loopEnd = true;
-            this.selMark1.on('reached', function(){
-                my.backend.logLoop(my.selMark0.position, my.selMark1.position);
-            });
         }
-        this.drawer.addMark(this.selMark1);
 
         this.drawer.updateSelection(percent0, percent1);
-        this.backend.updateSelection(percent0, percent1);
+
+        if (this.loopSelection) {
+            this.backend.updateSelection(percent0, percent1);
+        }
+        my.fireEvent('selection-update', this.getSelection());
     },
 
     clearSelection: function () {
+        this.drawer.clearSelection(this.selMark0, this.selMark1);
         if (this.selMark0) {
             this.selMark0.remove();
             this.selMark0 = null;
@@ -500,14 +613,14 @@ var WaveSurfer = {
             this.selMark1.remove();
             this.selMark1 = null;
         }
-        this.drawer.clearSelection();
-        this.backend.clearSelection();
+
+        if (this.loopSelection) {
+            this.backend.clearSelection();
+        }
     },
 
     toggleLoopSelection: function () {
         this.loopSelection = !this.loopSelection;
-        this.drawer.loopSelection = this.loopSelection;
-        this.backend.loopSelection = this.loopSelection;
 
         if (this.selMark0) this.selectionPercent0 = this.selMark0.percentage;
         if (this.selMark1) this.selectionPercent1 = this.selMark1.percentage;
@@ -517,20 +630,28 @@ var WaveSurfer = {
     },
 
     getSelection: function () {
-      if (!this.selMark0 || !this.selMark1) return null;
+        if (!this.selMark0 || !this.selMark1) return null;
+        return {
+            startPercentage: this.selMark0.percentage,
+            startPosition: this.selMark0.position,
+            endPercentage: this.selMark1.percentage,
+            endPosition: this.selMark1.position,
+            startTime: this.selMark0.getTitle(),
+            endTime: this.selMark1.getTitle()
+        };
+    },
 
-      var duration = this.getDuration();
-      var startPercentage = this.selMark0.percentage;
-      var endPercentage = this.selMark1.percentage;
+    enableInteraction: function () {
+        this.drawer.interact = true;
+    },
 
-      return {
-          startPercentage: startPercentage,
-          startPosition: startPercentage * duration,
-          endPercentage: endPercentage,
-          endPosition: endPercentage * duration
-      };
+    disableInteraction: function () {
+        this.drawer.interact = false;
+    },
+
+    toggleInteraction: function () {
+        this.drawer.interact = !this.drawer.interact;
     }
-
 };
 
 
@@ -545,35 +666,35 @@ WaveSurfer.Mark = {
     },
 
     init: function (options) {
-        return this.update(
+        this.apply(
             WaveSurfer.util.extend({}, this.defaultParams, options)
         );
+        return this;
     },
 
     getTitle: function () {
-        var d = new Date(this.position * 1000);
-        return d.getMinutes() + ':' + d.getSeconds();
+        return [
+            ~~(this.position / 60),                   // minutes
+            ('00' + ~~(this.position % 60)).slice(-2) // seconds
+        ].join(':');
     },
 
-    update: function (options) {
+    apply: function (options) {
         Object.keys(options).forEach(function (key) {
             if (key in this.defaultParams) {
                 this[key] = options[key];
             }
         }, this);
+    },
 
-        // If percentage is specified, but position is undefined,
-        // let the subscribers to recalculate the position
-        if (null == options.position && null != options.percentage) {
-            this.position = null;
-        }
-
+    update: function (options) {
+        this.apply(options);
         this.fireEvent('update');
-        return this;
     },
 
     remove: function () {
         this.fireEvent('remove');
+        this.unAll();
     }
 };
 
@@ -611,23 +732,23 @@ WaveSurfer.Observer = {
     },
 
     once: function (event, handler) {
-        var fn = (function () {
+        var my = this;
+        var fn = function () {
             handler();
-            this.un(event, fn);
-        }).bind(this);
+            setTimeout(function () {
+                my.un(event, fn);
+            }, 0);
+        };
         this.on(event, fn);
     },
 
     fireEvent: function (event) {
         if (!this.handlers) { return; }
-
         var handlers = this.handlers[event];
         var args = Array.prototype.slice.call(arguments, 1);
-        if (handlers) {
-            for (var i = 0, len = handlers.length; i < len; i += 1) {
-                handlers[i].apply(null, args);
-            }
-        }
+        handlers && handlers.forEach(function (fn) {
+            fn.apply(null, args);
+        });
     }
 };
 
@@ -636,11 +757,9 @@ WaveSurfer.util = {
     extend: function (dest) {
         var sources = Array.prototype.slice.call(arguments, 1);
         sources.forEach(function (source) {
-            if (source != null) {
-                Object.keys(source).forEach(function (key) {
-                    dest[key] = source[key];
-                });
-            }
+            Object.keys(source).forEach(function (key) {
+                dest[key] = source[key];
+            });
         });
         return dest;
     },
@@ -649,13 +768,74 @@ WaveSurfer.util = {
         return 'wavesurfer_' + Math.random().toString(32).substring(2);
     },
 
-    max: function (values) {
+    max: function (values, median) {
         var max = -Infinity;
         for (var i = 0, len = values.length; i < len; i++) {
             var val = values[i];
+            if (median != null) {
+                val = Math.abs(val - median);
+            }
             if (val > max) { max = val; }
         }
         return max;
+    },
+
+    ajax: function (options) {
+        var ajax = Object.create(WaveSurfer.Observer);
+        var xhr = new XMLHttpRequest();
+        xhr.open(options.method || 'GET', options.url, true);
+        xhr.responseType = options.responseType;
+        xhr.addEventListener('progress', function (e) {
+            ajax.fireEvent('progress', e);
+        });
+        xhr.addEventListener('load', function (e) {
+            ajax.fireEvent('load', e);
+
+            if (200 == xhr.status || 206 == xhr.status) {
+                ajax.fireEvent('success', xhr.response, e);
+            } else {
+                ajax.fireEvent('error', e);
+            }
+        });
+        xhr.addEventListener('error', function (e) {
+            ajax.fireEvent('error', e);
+        });
+        xhr.send();
+        ajax.xhr = xhr;
+        return ajax;
+    },
+
+    /**
+     * @see http://underscorejs.org/#throttle
+     */
+    throttle: function(func, wait, options) {
+        var context, args, result;
+        var timeout = null;
+        var previous = 0;
+        options || (options = {});
+        var later = function() {
+            previous = options.leading === false ? 0 : Date.now();
+            timeout = null;
+            result = func.apply(context, args);
+            context = args = null;
+        };
+        return function() {
+            var now = Date.now();
+            if (!previous && options.leading === false) previous = now;
+            var remaining = wait - (now - previous);
+            context = this;
+            args = arguments;
+            if (remaining <= 0) {
+                clearTimeout(timeout);
+                timeout = null;
+                previous = now;
+                result = func.apply(context, args);
+                context = args = null;
+            } else if (!timeout && options.trailing !== false) {
+                timeout = setTimeout(later, remaining);
+            }
+            return result;
+        };
     }
 };
 

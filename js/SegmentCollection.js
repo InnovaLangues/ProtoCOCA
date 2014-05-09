@@ -10,7 +10,6 @@
  * @returns {SegmentCollection}
  */
 function SegmentCollection(id, name, fId, fUrl, segments) {
-
     this.id = id;
     this.name = name;
     this.fId = fId;

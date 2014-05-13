@@ -18,7 +18,9 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
             selectionColor: 'rgba(255,0,0, .2)',
             selectionForeground: true,
             selectionBorderColor: '#d42929',
-            selectionBorder: true
+            selectionBorder: true,
+            interact: true,
+            loopSelection : false
         };
 
         myWaveSurferConfig = myWaveSurferConfig || {};
@@ -32,6 +34,7 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
             }, // isolated scope
             link: function($scope, el, attrs) {
                 $scope.$emit('wsLoading');
+
                 $scope.playMode = 'normal';
                 var $container = document.querySelector('#waveform');
                 // Reinject jQuery object into wavesurfer config
@@ -78,10 +81,9 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
                             $scope.time = UtilsFactory.secondsToHms($scope.waveSurfer.backend.getCurrentTime());
                         });
                     }, 1);
-                });
+                });      
+
                 progressDiv.style.display = 'none';
-
-
             },
             templateUrl: 'js/app/wavesurfer/partials/wave.html',
             controller: ['$scope',
@@ -99,9 +101,9 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
                     };
                     $scope.zoomIn = function() {
                         if ($scope.waveSurfer.minPxPerSec < maxZoom) {
-                            if(! $scope.waveSurfer.params.scrollParent)
+                            if (!$scope.waveSurfer.params.scrollParent)
                                 $scope.waveSurfer.toggleScroll();
-                            
+
                             //$scope.waveSurfer.params.scrollParent = true;
                             $scope.waveSurfer.params.minPxPerSec += zoomGap;
                             $scope.waveSurfer.minPxPerSec += zoomGap;
@@ -110,7 +112,7 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
                     };
                     $scope.zoomOut = function() {
                         if ($scope.waveSurfer.minPxPerSec > minZoom) {
-                            if(! $scope.waveSurfer.params.scrollParent)
+                            if (!$scope.waveSurfer.params.scrollParent)
                                 $scope.waveSurfer.toggleScroll();
                             //$scope.waveSurfer.params.scrollParent = true;
                             $scope.waveSurfer.params.minPxPerSec -= zoomGap;
@@ -118,9 +120,9 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
                             $scope.waveSurfer.drawBuffer();
                         }
                         else {
-                            if($scope.waveSurfer.params.scrollParent)
+                            if ($scope.waveSurfer.params.scrollParent)
                                 $scope.waveSurfer.toggleScroll();
-                           // $scope.waveSurfer.params.scrollParent = false;
+                            // $scope.waveSurfer.params.scrollParent = false;
                             $scope.waveSurfer.params.minPxPerSec = minZoom;
                             $scope.waveSurfer.minPxPerSec = minZoom;
                             $scope.waveSurfer.drawBuffer();

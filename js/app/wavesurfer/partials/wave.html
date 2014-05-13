@@ -17,9 +17,8 @@
     <!-- PLAYBACK CONTROL -->
     <div class="col-md-12">
         <div class="panel panel-default">
-
             <div class="controls panel-body text-center">
-                <h4 id="time">{{ time }}</h4>
+                <h4 id="time">{{ time}}</h4>
                 <button class="btn btn-primary" ng-click="back()">
                     <i class="glyphicon glyphicon-step-backward"></i>
                 </button>
@@ -47,6 +46,17 @@
                 <button class="btn btn-default" ng-click="zoomOut()" title="zoom out">
                     <span class="glyphicon glyphicon-zoom-out"></span>
                 </button>
+                <div class="play-mode-buttons btn-group">
+                    <button class="btn btn-default" ng-click="togglePlayMode($event)" data-value="normal" title="normal play">
+                        Normal
+                    </button>
+                    <button class="btn btn-default" ng-click="togglePlayMode($event)" data-value="segment" title="play segment">
+                        Only segment
+                    </button>
+                    <button class="btn btn-default" ng-click="togglePlayMode($event)" data-value="backward" title="backward building">
+                        Backward building
+                    </button>
+                </div>
                 <!-- u can also call a methode from parrent with ng-click="$parent.method()" -->
             </div>
         </div>

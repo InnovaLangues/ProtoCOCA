@@ -83,7 +83,6 @@ function SegmentFactory() {
         mergeSegments: function(segment, sIndex, segments, markers) {
             // is first segment ?
             if (this.getPreviousSegment(segment, segments) === null) {
-                console.log('ici');
                 // get next segment to merge datas of first segment and next one
                 var nSegment = this.getNextSegment(segment, segments);
                 if (nSegment) {
@@ -111,7 +110,6 @@ function SegmentFactory() {
             }
             return segments;
         }
-
     };
 }
 

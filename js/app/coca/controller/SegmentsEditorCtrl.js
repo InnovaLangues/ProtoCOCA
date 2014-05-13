@@ -4,7 +4,7 @@
  * 
  * @param {type} $scope scope
  */
-function SegmentsEditorCtrl($scope, $modal, $filter, UtilsFactory, WaveSurferFactory, SegmentFactory, SegmentCollectionFactory) {
+function SegmentsEditorCtrl($scope, $modal, $filter, UtilsFactory, WaveSurferFactory, SegmentFactory, SegmentCollectionFactory, MarkerFactory) {
 
     $scope.file = {};
     $scope.isEditing = false;
@@ -15,8 +15,6 @@ function SegmentsEditorCtrl($scope, $modal, $filter, UtilsFactory, WaveSurferFac
 
     // wavesurfer instance from directive
     $scope.wsInstance;
-
-   
 
     // events thrown by wave surfer directive
     $scope.$on('wsLoading', function() {
@@ -35,7 +33,42 @@ function SegmentsEditorCtrl($scope, $modal, $filter, UtilsFactory, WaveSurferFac
         if ($scope.isEditing) {
             $scope.drawSegments($scope.currentProject.segments);
         }
+
+        // listen to wavesurfer drag-mark event
+        $scope.wsInstance.drawer.on('drag-mark', function(drag, mark) {
+            //console.log(mark);
+        });
     });
+
+    // handle play event
+    $scope.$on('wsPlay', function(e, playMode) {
+        // pause if playing
+        if (!$scope.wsInstance.backend.isPaused()) {
+            $scope.wsInstance.playPause();
+        }
+        else {
+
+            if (playMode === 'normal') {
+                $scope.wsInstance.playPause();
+            }
+            else if (playMode === 'segment') {
+                var nextMarker = MarkerFactory.getNextMarker($scope.wsInstance.markers, $scope.wsInstance.backend.getCurrentTime(), $scope.wsInstance.backend.getDuration());
+                var end = nextMarker ? nextMarker.position : $scope.wsInstance.backend.getDuration();
+                $scope.wsInstance.play($scope.wsInstance.backend.getCurrentTime(), end);
+            }
+            else if (playMode === 'backward') {
+                var prevMarker = MarkerFactory.getPreviousMarker($scope.wsInstance.markers, $scope.wsInstance.backend.getDuration());
+                if (prevMarker) {
+                    playBackwardBuilding(prevMarker.position);
+                }
+                else {
+                    $scope.wsInstance.seekTo(0);
+                    $scope.wsInstance.playPause();
+                }
+            }
+        }
+    });
+
 
     $scope.init = function() {
         $scope.currentProject = null;
@@ -249,14 +282,14 @@ function SegmentsEditorCtrl($scope, $modal, $filter, UtilsFactory, WaveSurferFac
             if (result) {
                 if ($scope.isEditing) {
                     // need to do that explicitly to update the collection
-                    for(var i = 0; i < $scope.segmentCollections.length; i++){
-                        if($scope.currentProject.id === $scope.segmentCollections[i].id){
+                    for (var i = 0; i < $scope.segmentCollections.length; i++) {
+                        if ($scope.currentProject.id === $scope.segmentCollections[i].id) {
                             $scope.segmentCollections.splice(i, 1, $scope.currentProject);
                         }
                     }
                 }
-                else{
-                   $scope.segmentCollections.push($scope.currentProject); 
+                else {
+                    $scope.segmentCollections.push($scope.currentProject);
                 }
                 $scope.isEditing = true;
             }
@@ -474,7 +507,8 @@ function SegmentsEditorCtrl($scope, $modal, $filter, UtilsFactory, WaveSurferFac
                     $scope.wsInstance.mark({
                         color: 'rgba(255, 0, 0, 1)',
                         id: newMId,
-                        type: 'teacher'
+                        type: 'teacher',
+                        draggable: true
                     });
                 }
                 else {
@@ -485,9 +519,28 @@ function SegmentsEditorCtrl($scope, $modal, $filter, UtilsFactory, WaveSurferFac
                 $scope.wsInstance.mark({
                     color: 'rgba(255, 0, 0, 1)',
                     id: newMId,
-                    type: 'teacher'
+                    type: 'teacher',
+                    draggable: true
                 });
             }
         }
+    };
+
+    function playBackwardBuilding(currentStart) {
+        $scope.wsInstance.play(currentStart, $scope.wsInstance.backend.getDuration());
+        var last = false;
+        $scope.wsInstance.on('finish', function() {
+            // get new start
+            var prevMarker = MarkerFactory.getPreviousMarker($scope.wsInstance.markers, currentStart);
+            if (prevMarker) {
+                playBackwardBuilding(prevMarker.position);
+            }
+            else if(!last) {
+                last = true;
+                $scope.wsInstance.seekTo(0);
+                $scope.wsInstance.playPause();                
+            }
+        });
+
     };
 }

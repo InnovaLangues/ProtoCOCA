@@ -99,3 +99,4 @@ CocaApp.factory('WaveSurferFactory', WaveSurferFactory);
 CocaApp.factory('UtilsFactory', UtilsFactory);
 CocaApp.factory('SegmentCollectionFactory', SegmentCollectionFactory);
 CocaApp.factory('SegmentFactory', SegmentFactory);
+CocaApp.factory('MarkerFactory', MarkerFactory);

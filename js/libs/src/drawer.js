@@ -32,7 +32,7 @@ WaveSurfer.Drawer = {
         if (this.params.fillParent || this.params.scrollParent) {
             this.style(this.wrapper, {
                 width: '100%',
-                overflowX: 'auto',//this.params.scrollParent ? 'scroll' : 'hidden',
+                overflowX: this.params.scrollParent ? 'scroll' : 'hidden',
                 overflowY: 'hidden'
             });
         }
@@ -115,7 +115,7 @@ WaveSurfer.Drawer = {
     },
 
     recenter: function (percent) {
-        var position = this.containerWidth * percent;
+        var position = this.scrollWidth * percent;
         this.recenterOnPosition(position, true);
     },
 
@@ -211,6 +211,12 @@ WaveSurfer.Drawer = {
     removeMark: function (mark) {},
 
     updateMark: function (mark) {},
+    
+    addRegion: function (region) {}, 
+
+    removeRegion: function (region) {},
+
+    updateRegion: function (region) {},    
 
     drawSelection: function () {},
 

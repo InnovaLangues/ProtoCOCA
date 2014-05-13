@@ -18,8 +18,8 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
             selectionColor: 'rgba(255,0,0, .2)',
             selectionForeground: true,
             selectionBorderColor: '#d42929',
-            draggableMarkers: true
-        };      
+            selectionBorder: true
+        };
 
         myWaveSurferConfig = myWaveSurferConfig || {};
         // Merge default config with user config
@@ -32,6 +32,7 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
             }, // isolated scope
             link: function($scope, el, attrs) {
                 $scope.$emit('wsLoading');
+                $scope.playMode = 'normal';
                 var $container = document.querySelector('#waveform');
                 // Reinject jQuery object into wavesurfer config
                 options.container = $container;
@@ -42,7 +43,8 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
                     $scope.waveSurfer = Object.create(WaveSurfer);
                     $scope.waveSurfer.init(options);
                 } else {
-                    if ($scope.waveSurfer.markers) $scope.waveSurfer.clearMarks();
+                    if ($scope.waveSurfer.markers)
+                        $scope.waveSurfer.clearMarks();
                 }
                 $scope.waveSurfer.load($scope.myFile.url);
                 $scope.waveSurfer.on('loading', function(percent, xhr) {
@@ -66,6 +68,7 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
                     });
                     $scope.time = UtilsFactory.secondsToHms($scope.waveSurfer.backend.getCurrentTime());
                     $scope.$emit('wsLoaded', $scope.waveSurfer);
+
                 });
                 // listen to progress event
                 $scope.waveSurfer.on('progress', function() {
@@ -77,12 +80,14 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
                     }, 1);
                 });
                 progressDiv.style.display = 'none';
+
+
             },
             templateUrl: 'js/app/wavesurfer/partials/wave.html',
             controller: ['$scope',
                 function($scope) {
                     $scope.play = function() {
-                        $scope.waveSurfer.playPause();
+                        $scope.$emit('wsPlay', $scope.playMode);
                     };
                     // go to previous marker
                     $scope.back = function() {
@@ -94,31 +99,52 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
                     };
                     $scope.zoomIn = function() {
                         if ($scope.waveSurfer.minPxPerSec < maxZoom) {
-                            $scope.waveSurfer.params.scrollParent = true;
+                            if(! $scope.waveSurfer.params.scrollParent)
+                                $scope.waveSurfer.toggleScroll();
+                            
+                            //$scope.waveSurfer.params.scrollParent = true;
                             $scope.waveSurfer.params.minPxPerSec += zoomGap;
-                            $scope.waveSurfer.minPxPerSec += zoomGap;                            
+                            $scope.waveSurfer.minPxPerSec += zoomGap;
                             $scope.waveSurfer.drawBuffer();
                         }
                     };
                     $scope.zoomOut = function() {
                         if ($scope.waveSurfer.minPxPerSec > minZoom) {
-                            $scope.waveSurfer.params.scrollParent = true;
+                            if(! $scope.waveSurfer.params.scrollParent)
+                                $scope.waveSurfer.toggleScroll();
+                            //$scope.waveSurfer.params.scrollParent = true;
                             $scope.waveSurfer.params.minPxPerSec -= zoomGap;
                             $scope.waveSurfer.minPxPerSec -= zoomGap;
                             $scope.waveSurfer.drawBuffer();
                         }
-                        else{
-                            $scope.waveSurfer.params.scrollParent = false;
+                        else {
+                            if($scope.waveSurfer.params.scrollParent)
+                                $scope.waveSurfer.toggleScroll();
+                           // $scope.waveSurfer.params.scrollParent = false;
                             $scope.waveSurfer.params.minPxPerSec = minZoom;
                             $scope.waveSurfer.minPxPerSec = minZoom;
                             $scope.waveSurfer.drawBuffer();
-                        }                          
+                        }
                     };
                     $scope.changeSpeed = function(e) {
                         var value = e.target.dataset && e.target.dataset.value;
-                        $scope.waveSurfer.playPause();
-                        $scope.waveSurfer.backend.setPlaybackRate(value);
-                        $scope.waveSurfer.playPause();
+                        if (value) {
+                            $scope.waveSurfer.playPause();
+                            $scope.waveSurfer.backend.setPlaybackRate(value);
+                            $scope.waveSurfer.playPause();
+                        }
+                    };
+                    $scope.togglePlayMode = function(e) {
+
+                        var value = e.target.dataset && e.target.dataset.value;
+                        if (value) {
+                            $scope.playMode = value;
+                        }
+                        else {
+                            // default play mode == normal
+                            $scope.playMode = 'normal';
+                        }
+
                     };
                 }
             ]

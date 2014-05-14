@@ -135,12 +135,6 @@ var WaveSurfer = {
                 my.dragging = true;
                 my.updateSelection(drag);
             });
-            /* this.drawer.on('dblclick', function(drag, e) {
-             console.log(e.target.tagName);
-             if (e.target.tagName !== 'handler') {
-             my.clearSelection();
-             }
-             });*/
         }
 
         this.drawer.on('drag-mark', function(drag, mark) {
@@ -166,7 +160,7 @@ var WaveSurfer = {
             my.restartAnimationLoop();
         });
 
-        this.backend.on('finish', function() {
+        this.backend.on('finish', function() {  
             my.fireEvent('finish');
         });
 
@@ -192,6 +186,9 @@ var WaveSurfer = {
     },
     play: function(start, end) {
         this.backend.play(start, end);
+    },
+    playLoop : function(start, end){
+        
     },
     pause: function() {
         this.backend.pause();

@@ -12,13 +12,14 @@
 </div>
 
 
-<!-- CONTROLS & TOOLS LINE -->
+<!-- PLAYBACK CONTROLS -->
 <div class="row" id="controls">
-    <!-- PLAYBACK CONTROL -->
     <div class="col-md-12">
         <div class="panel panel-default">
-            <div class="controls panel-body text-center">
-                <h4 id="time">{{ time}}</h4>
+             <div class="panel-heading text-center">
+                 <h3 id="time">{{ time }}</h3>
+            </div>
+            <div class="controls panel-body text-center">               
                 <button class="btn btn-primary" ng-click="back()">
                     <i class="glyphicon glyphicon-step-backward"></i>
                 </button>
@@ -39,25 +40,43 @@
                 <button class="btn btn-danger" title="x0.65" ng-click="changeSpeed($event)" data-value="0.65">
                     x0.65                                   
                 </button>
-
+                
+                <button class="btn btn-default" ng-class="loop ? 'btn btn-default active':'btn btn-default'" ng-click="toggleLoop()" title="loop">
+                    <span class="glyphicon glyphicon-repeat"></span>
+                </button>
+                 <button class="btn btn-danger" ng-click="mark()">
+                            <i class="glyphicon glyphicon-flag"></i>
+                        </button>
                 <button class="btn btn-default" ng-click="zoomIn()" title="zoom in">
                     <span class="glyphicon glyphicon-zoom-in"></span>
                 </button>
                 <button class="btn btn-default" ng-click="zoomOut()" title="zoom out">
                     <span class="glyphicon glyphicon-zoom-out"></span>
                 </button>
+                <!-- u can also call a methode from parrent with ng-click="$parent.method()" -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row" id="play-options">
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">PLAY MODE</h3>
+            </div>
+            <div class="panel-body text-center">                
                 <div class="play-mode-buttons btn-group">
-                    <button class="btn btn-default" ng-click="togglePlayMode($event)" data-value="normal" title="normal play">
+                    <button class="btn btn-default" ng-class="playMode === 'normal' ? 'btn btn-default active':'btn btn-default'" ng-click="togglePlayMode($event)" data-value="normal" title="normal play">
                         Normal
                     </button>
-                    <button class="btn btn-default" ng-click="togglePlayMode($event)" data-value="segment" title="play segment">
-                        Only segment
+                    <button class="btn btn-default" ng-class="playMode === 'segment' ? 'btn btn-default active':'btn btn-default'" ng-click="togglePlayMode($event)" data-value="segment" title="play segment">
+                        Only between markers 
                     </button>
-                    <button class="btn btn-default" ng-click="togglePlayMode($event)" data-value="backward" title="backward building">
+                    <button class="btn btn-default" ng-class="playMode === 'backward' ? 'btn btn-default active':'btn btn-default'" ng-click="togglePlayMode($event)" data-value="backward" title="backward building">
                         Backward building
                     </button>
                 </div>
-                <!-- u can also call a methode from parrent with ng-click="$parent.method()" -->
             </div>
         </div>
     </div>

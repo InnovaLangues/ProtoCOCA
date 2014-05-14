@@ -88,10 +88,6 @@ WaveSurfer.WebAudio = {
             }
         }
 
-        /*if (Math.round(time) >= Math.round(this.getDuration())) {
-            this.fireEvent('finish 2', time);
-        }*/
-
         if (this.loop) {
             if (
                     this.prevFrameTime > this.loopStart &&

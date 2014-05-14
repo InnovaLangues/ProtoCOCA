@@ -41,7 +41,7 @@ function SegmentsEditorCtrl($scope, $modal, $filter, UtilsFactory, WaveSurferFac
     });
 
     // handle play event
-    $scope.$on('wsPlay', function(e, playMode) {
+    /*$scope.$on('wsPlay', function(e, playMode) {
         // pause if playing
         if (!$scope.wsInstance.backend.isPaused()) {
             $scope.wsInstance.playPause();
@@ -67,7 +67,7 @@ function SegmentsEditorCtrl($scope, $modal, $filter, UtilsFactory, WaveSurferFac
                 }
             }
         }
-    });
+    });*/
 
 
     $scope.init = function() {
@@ -526,7 +526,7 @@ function SegmentsEditorCtrl($scope, $modal, $filter, UtilsFactory, WaveSurferFac
         }
     };
 
-    function playBackwardBuilding(currentStart) {
+    /*function playBackwardBuilding(currentStart) {
         $scope.wsInstance.play(currentStart, $scope.wsInstance.backend.getDuration());
         var last = false;
         $scope.wsInstance.on('finish', function() {
@@ -542,5 +542,5 @@ function SegmentsEditorCtrl($scope, $modal, $filter, UtilsFactory, WaveSurferFac
             }
         });
 
-    };
+    };*/
 }

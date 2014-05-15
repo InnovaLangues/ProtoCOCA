@@ -82,6 +82,7 @@ WaveSurfer.WebAudio = {
         };
     },
     onPlayFrame: function(time) {
+        //var my = this;
         if (this.scheduledPause != null) {
             if (this.prevFrameTime >= this.scheduledPause) {
                 this.pause();

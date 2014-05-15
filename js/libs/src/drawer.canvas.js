@@ -3,32 +3,32 @@
 WaveSurfer.Drawer.Canvas = Object.create(WaveSurfer.Drawer);
 
 WaveSurfer.util.extend(WaveSurfer.Drawer.Canvas, {
-    createElements: function () {
+    createElements: function() {
         var waveCanvas = this.wrapper.appendChild(
-            this.style(document.createElement('canvas'), {
-                position: 'absolute',
-                zIndex: 1
-            })
-        );
+                this.style(document.createElement('canvas'), {
+                    position: 'absolute',
+                    zIndex: 1
+                })
+                );
 
         this.progressWave = this.wrapper.appendChild(
-            this.style(document.createElement('wave'), {
-                position: 'absolute',
-                zIndex: 2,
-                overflow: 'hidden',
-                width: '0',
-                height: this.params.height + 'px',
-                borderRight: [
-                    this.params.cursorWidth + 'px',
-                    'solid',
-                    this.params.cursorColor
-                ].join(' ')
-            })
-        );
+                this.style(document.createElement('wave'), {
+                    position: 'absolute',
+                    zIndex: 2,
+                    overflow: 'hidden',
+                    width: '0',
+                    height: this.params.height + 'px',
+                    borderRight: [
+                        this.params.cursorWidth + 'px',
+                        'solid',
+                        this.params.cursorColor
+                    ].join(' ')
+                })
+                );
 
         var progressCanvas = this.progressWave.appendChild(
-            document.createElement('canvas')
-        );
+                document.createElement('canvas')
+                );
 
         var selectionZIndex = 0;
 
@@ -37,38 +37,35 @@ WaveSurfer.util.extend(WaveSurfer.Drawer.Canvas, {
         }
 
         var selectionCanvas = this.wrapper.appendChild(
-            this.style(document.createElement('canvas'), {
-                position: 'absolute',
-                zIndex: selectionZIndex
-            })
-        );
+                this.style(document.createElement('canvas'), {
+                    position: 'absolute',
+                    zIndex: selectionZIndex
+                })
+                );
 
         this.waveCc = waveCanvas.getContext('2d');
         this.progressCc = progressCanvas.getContext('2d');
         this.selectionCc = selectionCanvas.getContext('2d');
     },
-
-    updateWidth: function () {
+    updateWidth: function() {
         var width = Math.round(this.width / this.pixelRatio);
         [
             this.waveCc,
             this.progressCc,
             this.selectionCc
-        ].forEach(function (cc) {
+        ].forEach(function(cc) {
             cc.canvas.width = this.width;
             cc.canvas.height = this.height;
-            this.style(cc.canvas, { width: width + 'px'});
+            this.style(cc.canvas, {width: width + 'px'});
         }, this);
 
         this.clearWave();
     },
-
-    clearWave: function () {
+    clearWave: function() {
         this.waveCc.clearRect(0, 0, this.width, this.height);
         this.progressCc.clearRect(0, 0, this.width, this.height);
     },
-
-    drawWave: function (peaks, max) {
+    drawWave: function(peaks, max) {
         // A half-pixel offset makes lines crisp
         var $ = 0.5 / this.pixelRatio;
         this.waveCc.fillStyle = this.params.waveColor;
@@ -103,17 +100,20 @@ WaveSurfer.util.extend(WaveSurfer.Drawer.Canvas, {
         this.progressCc.lineTo(this.width + $, halfH);
         this.progressCc.fill();
     },
-
-    updateProgress: function (progress) {
+    updateProgress: function(progress) {
         var pos = Math.round(
-            this.width * progress
-        ) / this.pixelRatio;
-        this.style(this.progressWave, { width: pos + 'px' });
+                this.width * progress
+                ) / this.pixelRatio;
+        this.style(this.progressWave, {width: pos + 'px'});
     },
-
-    addMark: function (mark) {
+    addMark: function(mark) {
         var my = this;
         var markEl = document.createElement('mark');
+
+        if(mark.type && mark.type === 'selMark'){
+            console.log('yep');
+            markEl.className = 'selection-mark';
+        }
         markEl.id = mark.id;
         this.wrapper.appendChild(markEl);
         var handler;
@@ -121,38 +121,40 @@ WaveSurfer.util.extend(WaveSurfer.Drawer.Canvas, {
         if (mark.draggable) {
             handler = document.createElement('handler');
             handler.id = mark.id + '-handler';
-            handler.className = 'wavesurfer-handler'
+            handler.className = mark.type && mark.type === 'selMark' ? 'selection-wavesurfer-handler':'wavesurfer-handler';
+            //handler.className = 'wavesurfer-handler';
+            
             markEl.appendChild(handler);
         }
 
-        markEl.addEventListener('mouseover', function (e) {
+        markEl.addEventListener('mouseover', function(e) {
             my.fireEvent('mark-over', mark, e);
         });
-        markEl.addEventListener('mouseleave', function (e) {
+        markEl.addEventListener('mouseleave', function(e) {
             my.fireEvent('mark-leave', mark, e);
         });
-        markEl.addEventListener('click', function (e) {
+        markEl.addEventListener('click', function(e) {
             my.fireEvent('mark-click', mark, e);
         });
 
-        mark.draggable && (function () {
+        mark.draggable && (function() {
             var drag = {};
 
-            var onMouseUp = function (e) {
+            var onMouseUp = function(e) {
                 e.stopPropagation();
                 drag.startPercentage = drag.endPercentage = null;
             };
             document.addEventListener('mouseup', onMouseUp);
-            my.on('destroy', function () {
+            my.on('destroy', function() {
                 document.removeEventListener('mouseup', onMouseUp);
             });
 
-            handler.addEventListener('mousedown', function (e) {
+            handler.addEventListener('mousedown', function(e) {
                 e.stopPropagation();
                 drag.startPercentage = my.handleEvent(e);
             });
 
-            my.wrapper.addEventListener('mousemove', WaveSurfer.util.throttle(function (e) {
+            my.wrapper.addEventListener('mousemove', WaveSurfer.util.throttle(function(e) {
                 e.stopPropagation();
                 if (drag.startPercentage != null) {
                     drag.endPercentage = my.handleEvent(e);
@@ -168,7 +170,7 @@ WaveSurfer.util.extend(WaveSurfer.Drawer.Canvas, {
                 position: 'absolute',
                 cursor: 'col-resize',
                 width: '12px',
-                height: '15px',                                
+                height: '15px',
             });
             this.style(handler, {
                 left: handler.offsetWidth / 2 * -1 + 'px',
@@ -177,8 +179,7 @@ WaveSurfer.util.extend(WaveSurfer.Drawer.Canvas, {
             });
         }
     },
-
-    updateMark: function (mark) {
+    updateMark: function(mark) {
         var markEl = document.getElementById(mark.id);
         markEl.title = mark.getTitle();
         this.style(markEl, {
@@ -187,45 +188,44 @@ WaveSurfer.util.extend(WaveSurfer.Drawer.Canvas, {
             zIndex: 4,
             width: mark.width + 'px',
             left: Math.max(0, Math.round(
-                mark.percentage * this.scrollWidth  - mark.width / 2
-            )) + 'px',
+                    mark.percentage * this.scrollWidth - mark.width / 2
+                    )) + 'px',
             backgroundColor: mark.color
         });
     },
-
-    removeMark: function (mark) {
-        var markEl = document.getElementById(mark.id);
-        if (markEl) {
-            this.wrapper.removeChild(markEl);
+    removeMark: function(mark) {
+        if (mark) {
+            var markEl = document.getElementById(mark.id);
+            if (markEl) {
+                this.wrapper.removeChild(markEl);
+            }
         }
     },
-
-    addRegion: function (region) {
+    addRegion: function(region) {
         var my = this;
         var regionEl = document.createElement('region');
         regionEl.id = region.id;
         this.wrapper.appendChild(regionEl);
-        
-        regionEl.addEventListener('mouseover', function (e) {
+
+        regionEl.addEventListener('mouseover', function(e) {
             my.fireEvent('region-over', region, e);
         });
-        regionEl.addEventListener('mouseleave', function (e) {
+        regionEl.addEventListener('mouseleave', function(e) {
             my.fireEvent('region-leave', region, e);
         });
-        regionEl.addEventListener('click', function (e) {
+        regionEl.addEventListener('click', function(e) {
             my.fireEvent('region-click', region, e);
         });
-        
+
         this.updateRegion(region);
     },
-    
-    updateRegion: function (region) {
+    updateRegion: function(region) {
         var regionEl = document.getElementById(region.id);
         var left = Math.max(0, Math.round(
                 region.startPercentage * this.scrollWidth));
         var width = Math.max(0, Math.round(
                 region.endPercentage * this.scrollWidth)) - left;
-                
+
         this.style(regionEl, {
             height: '100%',
             position: 'absolute',
@@ -234,17 +234,15 @@ WaveSurfer.util.extend(WaveSurfer.Drawer.Canvas, {
             top: '0px',
             width: width + 'px',
             backgroundColor: region.color
-        });                
+        });
     },
-    
-    removeRegion: function (region) {
+    removeRegion: function(region) {
         var regionEl = document.getElementById(region.id);
         if (regionEl) {
             this.wrapper.removeChild(regionEl);
         }
     },
-    
-    drawSelection: function () {
+    drawSelection: function() {
         this.eraseSelection();
 
         this.selectionCc.fillStyle = this.params.selectionColor;
@@ -253,13 +251,13 @@ WaveSurfer.util.extend(WaveSurfer.Drawer.Canvas, {
 
         this.selectionCc.fillRect(x, 0, width, this.height);
     },
-
-    eraseSelection: function () {
+    eraseSelection: function() {
         this.selectionCc.clearRect(0, 0, this.width, this.height);
     },
-
-    eraseSelectionMarks: function (mark0, mark1) {
-        this.removeMark(mark0);
-        this.removeMark(mark1);
+    eraseSelectionMarks: function(mark0, mark1) {
+        if (mark0)
+            this.removeMark(mark0);
+        if (mark1)
+            this.removeMark(mark1);
     }
 });

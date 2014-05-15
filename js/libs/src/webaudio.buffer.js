@@ -78,7 +78,6 @@ WaveSurfer.WebAudio.Buffer = {
         } else {
             this.source.noteOff(0);
         }
-
         this.fireEvent('pause');
     },
 

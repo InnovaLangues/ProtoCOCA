@@ -89,51 +89,34 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
             controller: ['$scope',
                 function($scope) {
                     // 'public' methods (callable from wiew)
-                    
+
                     // play / pause method
-                    $scope.play = function() {
-                        // pause if playing (call "pause")
+                    $scope.playPause = function() {
+                        // pause if playing 
                         if (!$scope.waveSurfer.backend.isPaused()) {
                             $scope.waveSurfer.playPause();
                         }
-                        // call "play"
                         else {
-
                             $scope.duration = $scope.waveSurfer.backend.getDuration();
 
-                            if ($scope.playMode === 'normal') {                                
+                            if ($scope.playMode === 'normal') {
                                 if ($scope.loop) {
-                                    console.log('normal loop');
                                     playNormalLoop($scope.waveSurfer.backend.getCurrentTime());
                                 } else {
-                                    console.log('normal');
                                     $scope.waveSurfer.playPause();
                                 }
                             }
                             else if ($scope.playMode === 'segment') {
-
-                                // without looping option work perfectly
                                 var prevMarker = WaveSurferFactory.getPreviousMarker($scope.waveSurfer.markers, $scope.waveSurfer.backend.getCurrentTime());
                                 var start = prevMarker ? prevMarker.position : 0;
                                 var nextMarker = WaveSurferFactory.getNextMarker($scope.waveSurfer.markers, $scope.waveSurfer.backend.getCurrentTime(), $scope.duration);
                                 var end = nextMarker ? nextMarker.position : $scope.duration;
                                 $scope.waveSurfer.play($scope.waveSurfer.backend.getCurrentTime(), end);
-
-                                // listen to progress in order to replay if needed
-                                if ($scope.loop) {
-                                    $scope.waveSurfer.on('progress', function() {
-                                        if ($scope.waveSurfer.backend.getCurrentTime().toFixed(1) >= end.toFixed(1)) {
-                                            $scope.waveSurfer.play(start, end);
-                                        }
-                                    });
-                                }
                             }
                             else if ($scope.playMode === 'backward') {
-
                                 var prevMarker = WaveSurferFactory.getPreviousMarker($scope.waveSurfer.markers, $scope.duration);
-                                //console.log($scope.prevMarker);
                                 if (prevMarker) {
-                                    playBackwardBuilding(prevMarker.position);
+                                    playBackwardBuilding(prevMarker.position, false);
                                 }
                                 else {
                                     $scope.waveSurfer.seekTo(0);
@@ -189,9 +172,8 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
                      * @param {Event} e
                      */
                     $scope.togglePlayMode = function(e) {
-                        // pause playing if necessary so that play method does not pause playing
+                        // pause playing if necessary
                         if (!$scope.waveSurfer.backend.isPaused()) {
-                            console.log();
                             $scope.waveSurfer.playPause();
                         }
                         var value = e.target.dataset && e.target.dataset.value;
@@ -201,7 +183,10 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
                             // default play mode
                             $scope.playMode = 'normal';
                         }
-                        $scope.play();
+                        // call play only if currently playing
+                        if (!$scope.waveSurfer.backend.isPaused()) {
+                            $scope.playPause();
+                        }
                     };
                     $scope.mark = function() {
                         $scope.waveSurfer.mark({
@@ -211,55 +196,39 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
                             draggable: true
                         });
                     };
-                    $scope.toggleLoop = function() {                        
+                    $scope.toggleLoop = function() {
                         $scope.loop = !$scope.loop;
-                        //$scope.play();
                     };
 
                     // 'private' methods
-                    function playBackwardBuilding(currentStart) {
+                    function playBackwardBuilding(currentStart, last) {
 
-                        var last = false;
-                        // play first time from given start
                         $scope.waveSurfer.play(currentStart, $scope.duration);
-
-                        // when reaching the end
-                        $scope.waveSurfer.on('finish', function() {
-
-                            console.log('finish');
-                            // get new start (previous marker position)
-                            var prevMarker = WaveSurferFactory.getPreviousMarker($scope.waveSurfer.markers, currentStart);
-
-                            if (prevMarker) {
-                                console.log('1');
-                                // recursively call the method with new start
-                                playBackwardBuilding(prevMarker.position);
-                            }
-                            // if no prev marker and not the last call wavesurfer play method
-                            else if (!last) {
-                                console.log('2');
-                                // now it is the last we dont call the récursive method
-                                last = true;
-                                // pause playback if playing (to be sure)
-                                if (!$scope.waveSurfer.backend.isPaused()) {
-                                    console.log('3');
-                                    $scope.waveSurfer.playPause();
+                        if (!last) {
+                            // when reaching the end
+                            $scope.waveSurfer.on('finish', function() {
+                                // get new start (previous marker position)
+                                var prevMarker = WaveSurferFactory.getPreviousMarker($scope.waveSurfer.markers, currentStart);
+                                if (prevMarker) {
+                                    // recursively call the method with new start
+                                    playBackwardBuilding(prevMarker.position, false);
                                 }
-                                // play the entire file
-                                $scope.waveSurfer.seekTo(0);
-                                $scope.waveSurfer.playPause();
-                            }
-                            console.log('last ' + last + ' loop ' + $scope.loop);
-                        });
+                                else {
+                                    playBackwardBuilding(0, true);
+                                    $scope.waveSurfer.un('finish');
+                                }
+                            });
+                        }
                     }
 
                     // loop the entire file
                     function playNormalLoop(currentStart) {
-                        console.log('playNormalLoop :: currentStart ' + currentStart + ' duration ' + $scope.duration );
-                        $scope.waveSurfer.play(currentStart,  $scope.duration);
+                        $scope.waveSurfer.play(currentStart, $scope.duration);
                         $scope.waveSurfer.on('finish', function() {
                             if ($scope.loop)
                                 playNormalLoop(0);
+                            else
+                                $scope.waveSurfer.un('finish');
                         });
                     }
                 }

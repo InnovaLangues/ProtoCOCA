@@ -111,7 +111,6 @@ WaveSurfer.util.extend(WaveSurfer.Drawer.Canvas, {
         var markEl = document.createElement('mark');
 
         if(mark.type && mark.type === 'selMark'){
-            console.log('yep');
             markEl.className = 'selection-mark';
         }
         markEl.id = mark.id;

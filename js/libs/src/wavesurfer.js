@@ -128,15 +128,15 @@ var WaveSurfer = {
          my.clearSelection();
          }
          });*/
-
+        // Delete Mark on handler dble click
         this.drawer.on('mark-dblclick', function(e) {
             var mark = my.markers[e.target.parentNode.id];
             if (mark) {
                 mark.remove();
             }
         });
-
-        this.drawer.on('clear-selection', function(e) {
+        // Clear selection on canvas dble click
+        this.drawer.on('drag-clear', function(e) {
             my.clearSelection();
         });
 
@@ -306,7 +306,7 @@ var WaveSurfer = {
             opts.percentage = opts.position / this.getDuration();
         }
 
-        var mark = Object.create(WaveSurfer.Mark);       
+        var mark = Object.create(WaveSurfer.Mark);
         mark.init(opts);
 
         // If we create marker while dragging we are creating selMarks
@@ -717,21 +717,18 @@ var WaveSurfer = {
     clearSelection: function() {
         if (this.selMark0 && this.selMark1) {
             this.drawer.clearSelection(this.selMark0, this.selMark1);
-        }
-        if (this.selMark0) {
+
             this.selMark0.remove();
             this.selMark0 = null;
-        }
-        if (this.selMark1) {
+            
             this.selMark1.remove();
             this.selMark1 = null;
+            
+            if (this.loopSelection) {
+                this.backend.clearSelection();
+            }
+            this.fireEvent('selection-update', this.getSelection());
         }
-
-        if (this.loopSelection) {
-            this.backend.clearSelection();
-        }
-        this.fireEvent('selection-update', this.getSelection());
-
     },
     toggleLoopSelection: function() {
         this.loopSelection = !this.loopSelection;

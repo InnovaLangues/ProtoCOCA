@@ -25,8 +25,7 @@ var WaveSurfer = {
         dragSelection: true,
         loopSelection: true,
         audioRate: 1,
-        interact: true,
-        draggableMarkers: false
+        interact: true
     },
     init: function(params) {
         // Extract relevant parameters (or defaults)
@@ -119,15 +118,6 @@ var WaveSurfer = {
             }, 0);
         });
 
-        /*this.drawer.on('dblclick', function(e) {
-         if (e.target.tagName.toLowerCase() === 'handler' && e.target.id.indexOf('wavesurfer') === -1) {
-         var mark = my.markers[e.target.parentNode.id];
-         mark.remove();
-         }
-         else if (my.params.dragSelection) {
-         my.clearSelection();
-         }
-         });*/
         // Delete Mark on handler dble click
         this.drawer.on('mark-dblclick', function(e) {
             var mark = my.markers[e.target.parentNode.id];

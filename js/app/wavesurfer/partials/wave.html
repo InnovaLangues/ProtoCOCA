@@ -40,10 +40,11 @@
                 <button class="btn btn-danger" title="x0.65" ng-click="changeSpeed($event)" data-value="0.65">
                     x0.65                                   
                 </button>
-                
+                <!--
                 <button class="btn btn-default" ng-class="loop ? 'btn btn-default active':'btn btn-default'" ng-click="toggleLoop()" title="loop">
                     <span class="glyphicon glyphicon-repeat"></span>
                 </button>
+                -->
                  <button class="btn btn-danger" ng-click="mark()">
                             <i class="glyphicon glyphicon-flag"></i>
                         </button>
@@ -71,7 +72,7 @@
                         Normal
                     </button>
                     <button class="btn btn-default" ng-class="playMode === 'segment' ? 'btn btn-default active':'btn btn-default'" ng-click="togglePlayMode($event)" data-value="segment" title="play segment">
-                        Only between markers 
+                        Only region (between two markers) 
                     </button>
                     <button class="btn btn-default" ng-class="playMode === 'backward' ? 'btn btn-default active':'btn btn-default'" ng-click="togglePlayMode($event)" data-value="backward" title="backward building">
                         Backward building

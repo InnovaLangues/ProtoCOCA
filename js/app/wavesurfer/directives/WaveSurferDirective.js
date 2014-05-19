@@ -124,7 +124,6 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
                                 var start = prevMarker ? prevMarker.position : 0;
                                 var nextMarker = WaveSurferFactory.getNextMarker($scope.waveSurfer.markers, $scope.waveSurfer.backend.getCurrentTime(), $scope.duration);
                                 var end = nextMarker ? nextMarker.position : $scope.duration;
-                                //console.log('start ' + start + ' end ' + end);
                                 $scope.waveSurfer.play(start, end);
                                 if ($scope.loop) {
                                     $scope.waveSurfer.on('progress', function() {
@@ -160,6 +159,7 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
                         if ($scope.waveSurfer.minPxPerSec < maxZoom) {
                             if (!$scope.waveSurfer.params.scrollParent)
                                 $scope.waveSurfer.toggleScroll();
+                            //$scope.waveSurfer.params.scrollParent = true;
                             $scope.waveSurfer.params.minPxPerSec += zoomGap;
                             $scope.waveSurfer.minPxPerSec += zoomGap;
                             $scope.waveSurfer.drawBuffer();
@@ -169,6 +169,7 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
                         if ($scope.waveSurfer.minPxPerSec > minZoom) {
                             if (!$scope.waveSurfer.params.scrollParent)
                                 $scope.waveSurfer.toggleScroll();
+                            //$scope.waveSurfer.params.scrollParent = true;
                             $scope.waveSurfer.params.minPxPerSec -= zoomGap;
                             $scope.waveSurfer.minPxPerSec -= zoomGap;
                             $scope.waveSurfer.drawBuffer();
@@ -176,6 +177,7 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
                         else {
                             if ($scope.waveSurfer.params.scrollParent)
                                 $scope.waveSurfer.toggleScroll();
+                            //$scope.waveSurfer.params.scrollParent = false;
                             $scope.waveSurfer.params.minPxPerSec = minZoom;
                             $scope.waveSurfer.minPxPerSec = minZoom;
                             $scope.waveSurfer.drawBuffer();

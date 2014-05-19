@@ -16,10 +16,12 @@
                                 <button class="btn btn-primary" title="Choose a file" ng-click="loadFile()">
                                     <i class="glyphicon glyphicon-upload"></i>                        
                                 </button>
+                                <!--
                                 <h3>...or an existing project...</h3>
                                 <button class="btn btn-primary" title="Choose a project" ng-click="loadSegmentProject()">
                                     <i class="glyphicon glyphicon-list-alt"></i>                        
                                 </button>
+                                -->
                                 <h3>to begin.</h3>
                             </div>
                         </div>
@@ -36,9 +38,11 @@
                 <button class="btn btn-primary" title="Open file" ng-click="loadFile()">
                     <i class="glyphicon glyphicon-upload"></i>                        
                 </button>
+                <!--
                 <button class="btn btn-primary" title="Open project" ng-click="loadSegmentProject()">
                     <i class="glyphicon glyphicon-list-alt"></i>                        
                 </button>
+                -->
                 <button class="btn btn-default" ng-click="init()">
                     <span class="glyphicon glyphicon-refresh"></span>
                 </button>
@@ -52,6 +56,7 @@
             </div>
         </div>
         <!-- SEGMENTS ZONE -->
+        <!--
         <div class="row" id="teacher-segments">
             <div class="col-md-12">
                 <div class="panel panel-default widget">
@@ -60,7 +65,9 @@
                     </div>
 
                     <div class="panel-body">
+        -->
                         <!-- BUTTONS -->
+                        <!--
                         <button class="btn btn-default" id="auto-draw" ng-click="autoDrawMarkers()">
                             Draw marker automatically
                         </button>
@@ -70,16 +77,20 @@
                         <button class="btn btn-default" id="split-files" ng-click="splitAudio()" ng-disabled="!currentProject.segments.length > 0">
                             Create files from segments
                         </button>
+                        -->
                         <!--<button class="btn btn-danger" ng-click="mark()">
                             <i class="glyphicon glyphicon-flag"></i>
                         </button>-->
+                        <!--
                         <button class="btn btn-default" id="save-segments" ng-click="saveSegmentCollection()" ng-disabled="!currentProject.segments.length > 0" title="Save all segments">
                             <span class="glyphicon glyphicon-floppy-disk"></span>
                         </button>
                         <button class="btn btn-danger" ng-click="deleteAllSegments()" title="Delete all segments">
                             <span class="glyphicon glyphicon-trash"></span>
                         </button>
+                        -->
                         <!-- SEGMENTS -->
+                        <!--
                         <div id="segments-container">
                             <ul class="list-group">
                                 <li ng-repeat="s in currentProject.segments" data-start="{{s.start}}" data-end="{{s.end}}" data-mendid="{{s.mEndId}}" data-mstartid="{{s.mStartId}}" id="{{s.id}}" class="segment list-group-item">
@@ -128,10 +139,11 @@
                                 </li>
                             </ul>
                         </div>
+                       
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
     </div>
 </div>
 

@@ -241,18 +241,23 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
 
                     // 'private' methods
                     function playBackwardBuilding(currentStart, last) {
-
-                        $scope.waveSurfer.play(currentStart, $scope.duration);
+                        //$scope.waveSurfer.play(currentStart, $scope.duration);
+                        // normalement p)as besoin de second argument dans la méthode (par défaut = longueur du fichier)
+                        $scope.waveSurfer.play(currentStart);
+                        console.log('ici ' + last);
                         if (!last) {
                             // when reaching the end
                             $scope.waveSurfer.on('finish', function() {
+                                console.log($scope.waveSurfer.markers);
                                 // get new start (previous marker position)
                                 var prevMarker = WaveSurferFactory.getPreviousMarker($scope.waveSurfer.markers, currentStart);
                                 if (prevMarker) {
+                                    console.log(prevMarker.position);
                                     // recursively call the method with new start
                                     playBackwardBuilding(prevMarker.position, false);
                                 }
                                 else {
+                                    console.log('last');
                                     playBackwardBuilding(0, true);
                                     $scope.waveSurfer.un('finish');
                                 }

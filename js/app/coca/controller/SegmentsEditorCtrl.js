@@ -40,36 +40,6 @@ function SegmentsEditorCtrl($scope, $modal, $filter, UtilsFactory, WaveSurferFac
         });
     });
 
-    // handle play event
-    /*$scope.$on('wsPlay', function(e, playMode) {
-        // pause if playing
-        if (!$scope.wsInstance.backend.isPaused()) {
-            $scope.wsInstance.playPause();
-        }
-        else {
-
-            if (playMode === 'normal') {
-                $scope.wsInstance.playPause();
-            }
-            else if (playMode === 'segment') {
-                var nextMarker = MarkerFactory.getNextMarker($scope.wsInstance.markers, $scope.wsInstance.backend.getCurrentTime(), $scope.wsInstance.backend.getDuration());
-                var end = nextMarker ? nextMarker.position : $scope.wsInstance.backend.getDuration();
-                $scope.wsInstance.play($scope.wsInstance.backend.getCurrentTime(), end);
-            }
-            else if (playMode === 'backward') {
-                var prevMarker = MarkerFactory.getPreviousMarker($scope.wsInstance.markers, $scope.wsInstance.backend.getDuration());
-                if (prevMarker) {
-                    playBackwardBuilding(prevMarker.position);
-                }
-                else {
-                    $scope.wsInstance.seekTo(0);
-                    $scope.wsInstance.playPause();
-                }
-            }
-        }
-    });*/
-
-
     $scope.init = function() {
         $scope.currentProject = null;
         $scope.file = null;

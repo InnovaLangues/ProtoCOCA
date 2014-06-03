@@ -42,7 +42,6 @@ function UtilsFactory($modal) {
         },
         xhr: function(url, data, callback) {
             var request = new XMLHttpRequest();
-
             request.onreadystatechange = function() {
                 if (request.readyState === 4 && request.status === 200) {
                     var response = JSON.parse(request.responseText);

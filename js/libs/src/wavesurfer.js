@@ -118,23 +118,27 @@ var WaveSurfer = {
             }, 0);
         });
 
-        // Delete Mark on handler dble click
-        this.drawer.on('mark-dblclick', function(e) {
-            var mark = my.markers[e.target.parentNode.id];
+        /**
+         * Delete Mark on handler dble click
+         * @param {string} marker id
+         */
+        this.drawer.on('mark-dblclick', function(id) {
+            var mark = my.markers[id];
             if (mark) {
                 mark.remove();
             }
         });
-        // Clear selection on canvas dble click
-        this.drawer.on('drag-clear', function(e) {
-            my.clearSelection();
-        });
+
 
         // Drag selection or marker events
         if (this.params.dragSelection) {
             this.drawer.on('drag', function(drag) {
                 my.dragging = true;
                 my.updateSelection(drag);
+            });
+            // Clear selection on canvas dble click
+            this.drawer.on('drag-clear', function() {
+                my.clearSelection();
             });
         }
 
@@ -710,10 +714,10 @@ var WaveSurfer = {
 
             this.selMark0.remove();
             this.selMark0 = null;
-            
+
             this.selMark1.remove();
             this.selMark1 = null;
-            
+
             if (this.loopSelection) {
                 this.backend.clearSelection();
             }

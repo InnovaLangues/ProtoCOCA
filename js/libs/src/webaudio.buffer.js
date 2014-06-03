@@ -51,7 +51,7 @@ WaveSurfer.WebAudio.Buffer = {
                 end = this.getDuration();
             }
         }
-        console.log('start ' + start + ' end ' + end);
+        //console.log('start ' + start + ' end ' + end);
 
         this.lastPlay = this.ac.currentTime;
         this.lastStartPosition = start;

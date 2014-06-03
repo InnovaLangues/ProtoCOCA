@@ -5,7 +5,7 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
         //var wavesurfer = Object.create(WaveSurfer);
         var maxZoom = 100;
         var minZoom = 13;
-        var zoomGap = 1;
+        var zoomGap = 5;
         var timeline;
         // Set some default options
         var options = {
@@ -56,6 +56,7 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
                     progressDiv.style.display = 'block';
                     progressBar.style.width = percent + '%';
                 });
+                
                 // Won't work on iOS until you touch the page
                 $scope.waveSurfer.on('ready', function() {
                     progressDiv.style.display = 'none';
@@ -67,6 +68,7 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
                         // create timeline object
                         timeline = Object.create(WaveSurfer.Timeline);
                     }
+                    
                     timeline.init({
                         wavesurfer: $scope.waveSurfer,
                         container: '#wave-timeline'
@@ -74,6 +76,7 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
                     $scope.time = UtilsFactory.secondsToHms($scope.waveSurfer.backend.getCurrentTime());
                     $scope.$emit('wsLoaded', $scope.waveSurfer);
                 });
+                
                 // listen to progress event
                 $scope.waveSurfer.on('progress', function() {
                     // surround the call with setTimeout to avoid that : https://docs.angularjs.org/error/$rootScope/inprog
@@ -244,20 +247,20 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
                         //$scope.waveSurfer.play(currentStart, $scope.duration);
                         // normalement p)as besoin de second argument dans la méthode (par défaut = longueur du fichier)
                         $scope.waveSurfer.play(currentStart);
-                        console.log('ici ' + last);
+                        //console.log('ici ' + last);
                         if (!last) {
                             // when reaching the end
                             $scope.waveSurfer.on('finish', function() {
-                                console.log($scope.waveSurfer.markers);
+                                //console.log($scope.waveSurfer.markers);
                                 // get new start (previous marker position)
                                 var prevMarker = WaveSurferFactory.getPreviousMarker($scope.waveSurfer.markers, currentStart);
                                 if (prevMarker) {
-                                    console.log(prevMarker.position);
+                                    //console.log(prevMarker.position);
                                     // recursively call the method with new start
                                     playBackwardBuilding(prevMarker.position, false);
                                 }
                                 else {
-                                    console.log('last');
+                                    //console.log('last');
                                     playBackwardBuilding(0, true);
                                     $scope.waveSurfer.un('finish');
                                 }

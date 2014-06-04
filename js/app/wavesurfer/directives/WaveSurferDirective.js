@@ -1,11 +1,9 @@
 'use strict';
 angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).directive('myWaveSurfer', ['myWaveSurferConfig', 'UtilsFactory', 'WaveSurferFactory',
     function(myWaveSurferConfig, UtilsFactory, WaveSurferFactory) {
-        //console.log('dir called');
-        //var wavesurfer = Object.create(WaveSurfer);
         var maxZoom = 100;
-        var minZoom = 13;
-        var zoomGap = 5;
+        var minZoom = 14;
+        var zoomGap = 2;
         var timeline;
         // Set some default options
         var options = {
@@ -21,7 +19,8 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
             selectionBorder: false,
             interact: true,
             loopSelection: false,
-            dragSelection: false
+            dragSelection: false,
+            scrollParent: true
         };
 
         myWaveSurferConfig = myWaveSurferConfig || {};
@@ -37,7 +36,7 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
                 $scope.$emit('wsLoading');
                 $scope.playMode = 'normal';
                 $scope.loop = false;
-                
+
                 var $container = document.querySelector('#waveform');
                 options.container = $container;
 
@@ -87,7 +86,7 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
                     }, 0);
                 });
 
-                // listen to this event to stop playing if necessary
+                // listen to this event to stop playing in segment mode
                 $scope.waveSurfer.on('mark', function(mark) {
                     if ($scope.playMode === 'segment' && mark.percentage === $scope.selection.endPercentage) {
                         // if loop
@@ -95,38 +94,20 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
                             $scope.waveSurfer.playPauseSelection();
                         }
                         else if (!$scope.waveSurfer.backend.isPaused()) {
+                           
                             // pause playing
                             $scope.playPause();
+                            //$scope.waveSurfer.clearSelection();
                             // move the playing cursor in order to allow to replay the segment (cf problem with getting PrevMarker/NextMarker)
-                            $scope.waveSurfer.skip(-0.1);
-                            $scope.waveSurfer.clearSelection();
+                            //$scope.waveSurfer.skip(-0.1);
+                            // avoid wavesurfer l.563 error with timeout
+                           /*window.setTimeout(function(){
+                                $scope.waveSurfer.clearSelection();
+                           }, 500);*/
+                             
                         }
                     }
                 });
-
-                /*
-                $scope.markers = null;
-                $scope.waveSurfer.on('marked', function(){
-                    window.setTimeout(function() {
-                        $scope.$apply(function() {
-                            $scope.markers = $scope.waveSurfer.markers;
-                        });
-                    }, 0);
-                });
-                $scope.waveSurfer.on('mark-update', function(){
-                    window.setTimeout(function() {
-                        $scope.$apply(function() {
-                            $scope.markers = $scope.waveSurfer.markers;
-                        });
-                    }, 0);
-                });
-                $scope.waveSurfer.on('mark-removed', function(){
-                    window.setTimeout(function() {
-                        $scope.$apply(function() {
-                            $scope.markers = $scope.waveSurfer.markers;
-                        });
-                    }, 0);
-                });*/
                 progressDiv.style.display = 'none';
             },
             templateUrl: 'js/app/wavesurfer/partials/wave.html',
@@ -151,9 +132,9 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
                                 }
                             }
                             else if ($scope.playMode === 'segment') {
-                                var prevMarker = WaveSurferFactory.getPreviousMarker($scope.waveSurfer.markers, $scope.waveSurfer.backend.getCurrentTime());
+                                var prevMarker = WaveSurferFactory.getPreviousMarkerForSelection($scope.waveSurfer.markers, $scope.waveSurfer.backend.getCurrentTime());
                                 var start = prevMarker ? prevMarker.position : 0;
-                                var nextMarker = WaveSurferFactory.getNextMarker($scope.waveSurfer.markers, $scope.waveSurfer.backend.getCurrentTime(), $scope.duration);
+                                var nextMarker = WaveSurferFactory.getNextMarkerForSelection($scope.waveSurfer.markers, $scope.waveSurfer.backend.getCurrentTime(), $scope.duration);
                                 var end = nextMarker ? nextMarker.position : $scope.duration;
                                 // create a selection
                                 $scope.selection = {};
@@ -161,25 +142,8 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
                                 $scope.selection.endPercentage = end / $scope.duration;
                                 $scope.waveSurfer.updateSelection($scope.selection);
                                 $scope.waveSurfer.playPauseSelection();
-
-                                //console.log('segment');
-                                /*var prevMarker = WaveSurferFactory.getPreviousMarker($scope.waveSurfer.markers, $scope.waveSurfer.backend.getCurrentTime());
-                                 var start = prevMarker ? prevMarker.position : 0;
-                                 var nextMarker = WaveSurferFactory.getNextMarker($scope.waveSurfer.markers, $scope.waveSurfer.backend.getCurrentTime(), $scope.duration);
-                                 var end = nextMarker ? nextMarker.position : $scope.duration;
-                                 $scope.waveSurfer.play(start, end);
-                                 if ($scope.loop) {
-                                 $scope.waveSurfer.on('progress', function() {
-                                 //console.log('current ' + $scope.waveSurfer.backend.getCurrentTime().toFixed(1) + ' end ' + end.toFixed(1));
-                                 if ($scope.waveSurfer.backend.getCurrentTime().toFixed(1) >= end.toFixed(1)) {
-                                 //console.log('replay at ' + start);
-                                 $scope.waveSurfer.play(start, end);
-                                 }
-                                 });
-                                 }*/
                             }
                             else if ($scope.playMode === 'backward') {
-                                console.log('backward called');
                                 var prevMarker = WaveSurferFactory.getPreviousMarker($scope.waveSurfer.markers, $scope.duration);
                                 if (prevMarker) {
                                     playBackwardBuilding(prevMarker.position, false);
@@ -200,32 +164,18 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
                         WaveSurferFactory.moveForward($scope.waveSurfer);
                     };
                     $scope.zoomIn = function() {
-                        if ($scope.waveSurfer.minPxPerSec < maxZoom) {
-                            if (!$scope.waveSurfer.params.scrollParent)
-                                $scope.waveSurfer.toggleScroll();
-                            //$scope.waveSurfer.params.scrollParent = true;
-                            $scope.waveSurfer.params.minPxPerSec += zoomGap;
-                            $scope.waveSurfer.minPxPerSec += zoomGap;
-                            $scope.waveSurfer.drawBuffer();
-                        }
+                        var current = $scope.waveSurfer.backend.getCurrentTime();
+                        $scope.waveSurfer.params.minPxPerSec += zoomGap;
+                        $scope.waveSurfer.minPxPerSec += zoomGap;
+                        $scope.waveSurfer.drawBuffer();                        
+                        $scope.waveSurfer.seekAndCenter(current / $scope.waveSurfer.backend.getDuration());
                     };
                     $scope.zoomOut = function() {
-                        if ($scope.waveSurfer.minPxPerSec > minZoom) {
-                            if (!$scope.waveSurfer.params.scrollParent)
-                                $scope.waveSurfer.toggleScroll();
-                            //$scope.waveSurfer.params.scrollParent = true;
-                            $scope.waveSurfer.params.minPxPerSec -= zoomGap;
-                            $scope.waveSurfer.minPxPerSec -= zoomGap;
-                            $scope.waveSurfer.drawBuffer();
-                        }
-                        else {
-                            if ($scope.waveSurfer.params.scrollParent)
-                                $scope.waveSurfer.toggleScroll();
-                            //$scope.waveSurfer.params.scrollParent = false;
-                            $scope.waveSurfer.params.minPxPerSec = minZoom;
-                            $scope.waveSurfer.minPxPerSec = minZoom;
-                            $scope.waveSurfer.drawBuffer();
-                        }
+                        var current = $scope.waveSurfer.backend.getCurrentTime();
+                        $scope.waveSurfer.params.minPxPerSec -= zoomGap;
+                        $scope.waveSurfer.minPxPerSec -= zoomGap;
+                        $scope.waveSurfer.drawBuffer();
+                        $scope.waveSurfer.seekAndCenter(current / $scope.waveSurfer.backend.getDuration());
                     };
                     $scope.changeSpeed = function(e) {
                         var value = e.target.dataset && e.target.dataset.value;
@@ -291,13 +241,10 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
                         }
                         // play selection
                         $scope.waveSurfer.playPauseSelection();
-                        
-                        // normalement pas besoin de second argument dans la méthode (par défaut = longueur du fichier)
-                        // $scope.waveSurfer.play(currentStart);
 
-                        if (!last) {
-                            // when reaching the end
-                            $scope.waveSurfer.once('finish', function() {                               
+                        // when reaching the end
+                        $scope.waveSurfer.once('finish', function() {
+                            if (!last) {
                                 // get new start (previous marker position)
                                 var prevMarker = WaveSurferFactory.getPreviousMarker($scope.waveSurfer.markers, currentStart);
                                 if (prevMarker) {
@@ -305,17 +252,13 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
                                     playBackwardBuilding(prevMarker.position, false);
                                 }
                                 else {
-                                    console.log('last');
                                     playBackwardBuilding(0, true);
-                                    //$scope.waveSurfer.un('finish');
                                 }
-                            });
-                        }
-                        else{
-                            $scope.waveSurfer.once('finish', function() {
+                            }
+                            else {
                                 $scope.waveSurfer.clearSelection();
-                            });
-                        }
+                            }
+                        });
                     }
 
                     // loop the entire file

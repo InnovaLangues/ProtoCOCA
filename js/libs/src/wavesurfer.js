@@ -567,7 +567,6 @@ var WaveSurfer = {
                     if (marker.position <= time && marker.position >= prevTime) {
                         // Prevent firing the event more than once per playback
                         marker.played = true;
-
                         my.fireEvent('mark', marker);
                         marker.fireEvent('reached');
                     }

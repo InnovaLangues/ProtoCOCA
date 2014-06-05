@@ -41,24 +41,26 @@ function UtilsFactory($modal) {
             }
         },
         xhr: function(url, data, callback) {
+            var pmodal = null;
             var request = new XMLHttpRequest();
             request.onreadystatechange = function() {
-                if (request.readyState === 4 && request.status === 200) {
+                if (request.readyState === 4 && request.status === 200 && null !== pmodal) {
                     var response = JSON.parse(request.responseText);
                     callback(response);
-                    //$('.progress-bar').css('width', '0%');
-                    pmodal.close();
+                    // avoid firefox TypeError : n.get(...) is undefined 
+                    window.setTimeout(function(){
+                        pmodal.close();
+                    }, 0);
+                    
                 }
             };
-           
             // open modal
-            var pmodal = $modal.open({
+            pmodal = $modal.open({
                 templateUrl: 'js/app/progress/partials/progress_1.html',
                 controller: 'ProgressModalCtrl',
                 backdrop: 'static'
             });
             request.upload.onprogress = function(e) {
-
                 if (e.lengthComputable) {
                     $('.progress-bar').css('width', ((e.loaded / e.total) * 100) + '%');
                 }

@@ -193,8 +193,8 @@ angular.module('WaveSurferDirective', []).value('myWaveSurferConfig', {}).direct
                     $scope.togglePlayMode = function(e) {
                         if ($scope.waveSurfer.getSelection()) {
                             $scope.waveSurfer.clearSelection();
-                            console.log('clear selection ?');
                         }
+                        $scope.waveSurfer.un('finish');
                         // pause playing if necessary
                         if (!$scope.waveSurfer.backend.isPaused()) {
                             $scope.waveSurfer.playPause();

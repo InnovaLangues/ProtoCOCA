@@ -151,6 +151,7 @@ WaveSurfer.util.extend(WaveSurfer.Drawer.Canvas, {
             handler.addEventListener('mousedown', function(e) {
                 e.stopPropagation();
                 drag.startPercentage = my.handleEvent(e);
+                my.fireEvent('mark-down', mark, e);
             });
 
             my.wrapper.addEventListener('mousemove', WaveSurfer.util.throttle(function(e) {
